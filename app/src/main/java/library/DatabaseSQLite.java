@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Database {
-    private final static String URL = "jdbc:sqlite:./src/main/resources/db.sqlite";
+    private final static String URL = "jdbc:sqlite:./app/src/main/resources/db.sqlite";
     private final static String DRIVER = "org.sqlite.JDBC";
 
     public void executeUpdateQuery(String query) {

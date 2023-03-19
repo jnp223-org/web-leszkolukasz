@@ -7,8 +7,8 @@ import java.util.Map;
 public abstract class AbstractPage {
     protected Database db;
 
-    protected AbstractPage() {
-        db = new Database();
+    protected AbstractPage(Database db) {
+        this.db = db;
     }
 
     protected String injectIntoHTML(String body)
@@ -23,11 +23,4 @@ public abstract class AbstractPage {
 
         return str.toString();
     }
-
-    public String getGETResponse(String url) {
-        return "";
-    };
-    public String getPOSTResponse(String url, Map<String, String> params) {
-        return "";
-    };
 }
