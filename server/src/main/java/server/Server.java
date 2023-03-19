@@ -1,7 +1,7 @@
 package server;
 
-import library.routes.AbstractPage;
-import library.routes.RouteMatcher;
+import server.routes.AbstractPage;
+import server.routes.RouteMatcher;
 
 import java.io.BufferedReader;
 import java.io.IOException;

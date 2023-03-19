@@ -1,8 +1,6 @@
-package library.routes;
+package server.routes;
 
-import library.Database;
-
-import java.util.Map;
+import server.Database;
 
 public abstract class AbstractPage {
     protected Database db;

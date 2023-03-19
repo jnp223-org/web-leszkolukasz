@@ -2,14 +2,23 @@ package library.routes;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import library.DatabaseSQLite;
 import library.orm.Book;
+import server.Database;
+import server.routes.AbstractPage;
+import server.routes.GetPage;
+import server.routes.PostPage;
 
-public class BookPage extends AbstractPage {
+public class BookPage extends AbstractPage implements GetPage, PostPage {
 
-    @Override
+    public BookPage(Database db) {
+        super(db);
+    }
+
     public String getGETResponse(String url) {
         String addBookPattern = "\\/books\\/add.*";
         String deleteBookPattern = "\\/books\\/delete.*";
@@ -25,7 +34,6 @@ public class BookPage extends AbstractPage {
         return showBooks(url);
     }
 
-    @Override
     public String getPOSTResponse(String url, Map<String, String> params) {
         String addBookPattern = "\\/books\\/add.*";
         String deleteBookPattern = "\\/books\\/delete.*";
@@ -42,11 +50,12 @@ public class BookPage extends AbstractPage {
     }
 
     private String showBooks(String url) {
-        List<Book> books = db.executeSelectQuery("SELECT id, name, author FROM Books;");
+        List<Object> books = db.executeSelectQuery("SELECT id, name, author FROM Books;");
         StringBuilder str = new StringBuilder();
         str.append("<table><tr><th>ID</th><th>Name</th><th>Author</th></tr>");
 
-        for (Book book : books) {
+        for (Object bookObj : books) {
+            Book book = (Book)bookObj;
             str.append("<tr><td>");
             str.append(book.id());
             str.append("</td><td>");
@@ -81,40 +90,42 @@ public class BookPage extends AbstractPage {
     }
 
     private String updateBook(String url) {
-        Pattern updateQuery = Pattern.compile(".*\\/(\\d*).*");
+        Pattern updateQuery = Pattern.compile(".*\\/(\\d+).*");
         Matcher updateMatcher = updateQuery.matcher(url);
 
-        if (updateMatcher.matches()) {
-            String id = updateMatcher.group(1);
-            System.out.println(id);
-            List<Book> books = db.executeSelectQuery("SELECT id, name, author FROM Books WHERE id=\"" + id + "\";");
+        if (!updateMatcher.matches())
+            return "Wrong URL";
 
-            if (books.size() == 0) {
-                return "No book in database";
-            }
+        String id = updateMatcher.group(1);
+        List<Object> books = db.executeSelectQuery("SELECT id, name, author FROM Books WHERE id=\"" + id + "\";");
 
-            String form = String.format("""
-                    <form action="/books/update/%s/" method="post">
-                      <label for="name">Name:</label><br>
-                      <input type="text" id="name" name="name" value="%s" required><br>
-                      <label for="author">Author:</label><br>
-                      <input type="text" id="author" name="author" value="%s" required><br><br>
-                      <input type="submit" value="Update">
-                    </form>
-                    """, books.get(0).id(), books.get(0).name(), books.get(0).author());
-
-            return injectIntoHTML(form);
+        if (books.size() == 0) {
+            return "No book in database";
         }
 
-        return "Wrong URL";
+        Book book = (Book)books.get(0);
+
+        String form = String.format("""
+                <form action="/books/update/%s/" method="post">
+                  <label for="name">Name:</label><br>
+                  <input type="text" id="name" name="name" value="%s" required><br>
+                  <label for="author">Author:</label><br>
+                  <input type="text" id="author" name="author" value="%s" required><br><br>
+                  <input type="submit" value="Update">
+                </form>
+                """, book.id(), book.name(), book.author());
+
+        return injectIntoHTML(form);
     }
 
     private String updateBookPOST(String url, Map<String, String> params) {
-        Pattern formQuery = Pattern.compile(".*\\/(\\d*)\\/\\?name=(.*)&author=(.*)");
-        Matcher formMatcher = formQuery.matcher(url);
+        Pattern updateQuery = Pattern.compile(".*\\/(\\d+).*");
+        Matcher updateMatcher = updateQuery.matcher(url);
 
-        String id = formMatcher.group(1);
+        if (!updateMatcher.matches())
+            return "Incorrect URL";
 
+        String id = updateMatcher.group(1);
         db.executeUpdateQuery("UPDATE Books SET name = \"" + params.get("name") + "\", author = \"" + params.get("author") + "\" WHERE id = " + id + ";");
         return "Updated";
     }

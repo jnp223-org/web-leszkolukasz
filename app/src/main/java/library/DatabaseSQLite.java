@@ -1,12 +1,14 @@
 package library;
 
 import library.orm.Book;
+import server.Database;
 
 import java.sql.DriverManager;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
-public class Database {
+public class DatabaseSQLite implements Database {
     private final static String URL = "jdbc:sqlite:./app/src/main/resources/db.sqlite";
     private final static String DRIVER = "org.sqlite.JDBC";
 
@@ -24,8 +26,8 @@ public class Database {
         }
     }
 
-    public List<Book> executeSelectQuery(String query) {
-        List<Book> result = new ArrayList<>();
+    public List<Object> executeSelectQuery(String query) {
+        List<Object> result = new ArrayList<>();
 
         try {
             Class.forName(DRIVER);

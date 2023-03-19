@@ -1,4 +1,4 @@
-package library.routes;
+package server.routes;
 
 import java.util.Map;
 

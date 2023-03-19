@@ -23,6 +23,8 @@ dependencies {
     // This dependency is used by the application.
     implementation 'com.google.guava:guava:31.1-jre'
     implementation group: 'org.xerial', name: 'sqlite-jdbc', version: '3.41.0.0'
+
+    implementation project(":server")
 }
 
 application {
