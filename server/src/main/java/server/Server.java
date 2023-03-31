@@ -22,10 +22,10 @@ public class Server {
     private List<RouteMatcher> routes;
     private ExecutorService executor;
 
-    public Server(int port) {
+    public Server(int port, int threads) {
         this.port = port;
         this.routes = new ArrayList<>();
-        this.executor = Executors.newFixedThreadPool(10);
+        this.executor = Executors.newFixedThreadPool(threads);
     }
 
     public void start() throws IOException {

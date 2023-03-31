@@ -9,7 +9,7 @@ import java.io.IOException;
 
 public class App {
     public static void main(String... args) throws IOException  {
-        Server server = new Server(8000);
+        Server server = new Server(8000, 3);
         Database db = new DatabaseSQLite();
 
         server.addRoute("/", new MainPage(db));
