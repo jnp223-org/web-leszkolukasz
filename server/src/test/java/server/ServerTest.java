@@ -1,6 +1,7 @@
 package server;
 
 import com.codeborne.selenide.Condition;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import server.routes.AbstractPage;
 import server.routes.GetPage;
@@ -8,8 +9,10 @@ import server.routes.GetPage;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.codeborne.selenide.Condition.*;
+import static com.codeborne.selenide.WebDriverRunner.url;
 import static org.junit.jupiter.api.Assertions.*;
 import static com.codeborne.selenide.Selenide.*;
 import static org.mockito.Mockito.*;
@@ -22,9 +25,13 @@ class ServerTest {
     static int port = 1234;
 
     public ServerTest() {
-        System.setProperty("selenide.baseUrl", "http://localhost:1234");
-        server = new Server(port++, 2);
         db = mock(Database.class);
+    }
+
+    void setupServer(int add) {
+        port += add;
+        System.setProperty("selenide.baseUrl", "http://localhost:"+port);
+        server = new Server(port, 2);
     }
 
     Thread startServer() {
@@ -54,6 +61,7 @@ class ServerTest {
             }
         }
 
+        setupServer(0);
         server.addRoute("/", new Page(db));
         startServer();
 
@@ -64,6 +72,7 @@ class ServerTest {
             threads.add(new Thread(() -> {
                 long start = System.currentTimeMillis();
                 open("/");
+                System.out.println(url());
                 long stop = System.currentTimeMillis();
                 waitTimes.add(stop-start);
             }));
@@ -98,12 +107,13 @@ class ServerTest {
             }
         }
 
-
+        setupServer(1);
         server.addRoute("/", new Page(db, "home"));
         server.addRoute("/test", new Page(db, "test"));
         startServer();
 
         open("/test");
+        System.out.println(url());
         $("body").shouldHave(text("test"));
 
         open("/nonexistingurl");
