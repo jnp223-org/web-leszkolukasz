@@ -8,3 +8,6 @@
 - **/books/delete (GET/POST)** - usuwa ksiązke
 
 Testy działają tylko jeśli uruchomi się je pojedynczo
+
+### Branches
+other branches have other stages of server
