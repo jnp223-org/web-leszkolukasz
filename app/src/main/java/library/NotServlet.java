@@ -1,2 +1,4 @@
-package library;public class NotServlet {
+package library;
+
+public class NotServlet {
 }

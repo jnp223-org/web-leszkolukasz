@@ -1,6 +1,10 @@
 package servletcontainer.api;
 
 public interface HttpServlet {
-    void doGet();
-    void doPost();
+    default void doGet() {
+
+    }
+    default void doPost() {
+
+    }
 }

@@ -18,39 +18,47 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ServletContainer {
+    final String DEPLOY_URL = "server/src/main/resources/deploy";
 
     final private ServletManager servletManager;
     public ServletContainer() {
         servletManager = new ServletManager();
     }
 
+    public ServletManager getServletManager() {
+        return this.servletManager;
+    }
+
     public void servletScan() {
         unzipWarFiles();
 
-        File appFolder = new File("../resources");
+        File appFolder = new File(DEPLOY_URL);
         File[] apps = appFolder.listFiles();
 
-        List<URL> folderURLs = new ArrayList<>();
-        List<String> classNames = new ArrayList<>();
+        for (File app: apps) {
+            if (app.getName().endsWith(".war"))
+                continue;
 
-        for (File app: apps)
+            List<URL> folderURLs = new ArrayList<>();
+            List<String> classNames = new ArrayList<>();
             folderURLs.addAll(getFolderURLs(app));
-
-        for (File app: apps)
             classNames.addAll(getclassNames(app, app.getName()));
 
-        URL[] urls = folderURLs.toArray(new URL[0]);
-        ClassLoader cl = new URLClassLoader(urls);
+            URL[] urls = folderURLs.toArray(new URL[0]);
+            ClassLoader cl = new URLClassLoader(urls);
 
-        for (var clsName: classNames) {
-            System.out.println(clsName);
-            try {
-                Class<?> cls = cl.loadClass(clsName);
-                Servlet annotation = cls.getAnnotation(Servlet.class);
-                if (annotation != null)
-                    servletManager.addServlet(cls, annotation.url());
-            } catch (ClassNotFoundException e) {
-                throw new RuntimeException(e);
+            for (var clsName: classNames) {
+                System.out.println(clsName);
+                try {
+                    Class<?> cls = cl.loadClass(clsName);
+                    Servlet annotation = cls.getAnnotation(Servlet.class);
+                    if (annotation != null) {
+                        servletManager.addServlet(cls,  "/" + app.getName() + annotation.url());
+                        System.out.println("Servlet found for url: " + "/" + app.getName() + annotation.url());
+                    }
+                } catch (ClassNotFoundException e) {
+                    throw new RuntimeException(e);
+                }
             }
         }
 
@@ -79,7 +87,12 @@ public class ServletContainer {
         File[] files = folder.listFiles();
         for (File file : files) {
             if (file.isDirectory()) {
-                classNames.addAll(getclassNames(file, packageName + "." + file.getName()));
+                if (file.getName().equals("WEB-INF") || file.getName().equals("classes"))
+                    classNames.addAll(getclassNames(file, ""));
+                else {
+                    String newPackageName = packageName.isEmpty() ? file.getName() : packageName + "." + file.getName();
+                    classNames.addAll(getclassNames(file, newPackageName));
+                }
             } else if (file.isFile() && file.getName().endsWith(".class")) {
                 String className = file.getName().substring(0, file.getName().lastIndexOf("."));
                 classNames.add(packageName + "." + className);
@@ -90,7 +103,7 @@ public class ServletContainer {
     }
 
     public void unzipWarFiles() {
-        File folder = new File("../resources");
+        File folder = new File(DEPLOY_URL);
         File[] files = folder.listFiles();
         for (File file : files) {
             if (file.isFile() && file.getName().endsWith(".war")) {
@@ -128,7 +141,7 @@ public class ServletContainer {
     }
 
     private void removeUnzippedFiles() {
-        File folder = new File("../resources");
+        File folder = new File(DEPLOY_URL);
         File[] files = folder.listFiles();
         for (File file : files)
             if (file.isFile() && !file.getName().endsWith(".war"))

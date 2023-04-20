@@ -9,6 +9,7 @@
 plugins {
     // Apply the application plugin to add support for building a CLI application in Java.
     id 'application'
+    id 'war'
 }
 
 repositories {
@@ -22,14 +23,38 @@ dependencies {
 
     // This dependency is used by the application.
     implementation 'com.google.guava:guava:31.1-jre'
+
+    implementation files("../server/build/libs/servlet-api.jar")
 }
 
 application {
     // Define the main class for the application.
-    mainClass = 'library.App'
+    // mainClass = 'library.App'
 }
 
 tasks.named('test') {
     // Use JUnit Platform for unit tests.
     useJUnitPlatform()
 }
+
+war {
+    // Set the output directory and filename for the generated WAR file
+    archiveFileName = "app.war"
+    destinationDirectory = file("build/libs")
+    // Set the web app directory for the WAR file
+    webAppDirName = 'src/main/java/library'
+}
+
+// Exclude the compiled classes from the WAR file
+//war {
+//    classpath fileTree('build/classes/java/main')
+//    exclude 'META-INF/*.RSA', 'META-INF/*.SF', 'META-INF/*.DSA'
+//    exclude 'WEB-INF/classes/**'
+//}
+
+// Include the resources in the WAR file
+//war {
+//    from('src/main/resources') {
+//        into 'WEB-INF/classes'
+//    }
+//}

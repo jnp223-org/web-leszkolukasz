@@ -33,3 +33,12 @@ tasks.named('test') {
     // Use JUnit Platform for unit tests.
     useJUnitPlatform()
 }
+
+tasks.named('jar', Jar) {
+    // Set the output directory for the generated JAR file
+    archiveFileName = "servlet-api.jar"
+    destinationDirectory = file("build/libs")
+    from('build/classes/java/main/servletcontainer/api') {
+        include '**/*.class'
+    }
+}
