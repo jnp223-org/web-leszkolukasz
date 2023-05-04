@@ -3,30 +3,56 @@
  */
 package servletcontainer;
 
+import servletcontainer.api.HttpServlet;
+import servletcontainer.api.HttpServletRequest;
+import servletcontainer.api.HttpServletResponse;
 import servletcontainer.api.Servlet;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.List;
 
 public class ServletContainer {
-    final String DEPLOY_URL = "server/src/main/resources/deploy";
-
+    final private String DEPLOY_URL = "server/src/main/resources/deploy";
+    private int port;
+    private ServerSocket serverSocket;
+    final private ExecutorService executor;
     final private ServletManager servletManager;
-    public ServletContainer() {
-        servletManager = new ServletManager();
+
+    public ServletContainer(int threads) {
+        this.servletManager = new ServletManager();
+        this.executor = Executors.newFixedThreadPool(threads);
     }
 
-    public ServletManager getServletManager() {
-        return this.servletManager;
+    public void start(int port) throws IOException {
+        this.port = port;
+        serverSocket = new ServerSocket(port);
+
+        while (true) {
+            Socket clientSocket = serverSocket.accept();
+            executor.submit(() -> {
+                try {
+                    HttpServletRequest req = new HttpServletRequestImp(clientSocket, servletManager);
+                    HttpServletResponse resp = req.createHttpServletResponse();
+                    servletManager.getServlet(req.getUrl()).service(req, resp);
+                }
+                catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
+        }
+    }
+
+    public void addRoute(Class<? extends HttpServlet> cls, String path) {
+        servletManager.addServlet(cls, path);
     }
 
     public void servletScan() {
@@ -54,7 +80,6 @@ public class ServletContainer {
                     Servlet annotation = cls.getAnnotation(Servlet.class);
                     if (annotation != null) {
                         servletManager.addServlet(cls,  "/" + app.getName() + annotation.url());
-                        System.out.println("Servlet found for url: " + "/" + app.getName() + annotation.url());
                     }
                 } catch (ClassNotFoundException e) {
                     throw new RuntimeException(e);
@@ -144,7 +169,7 @@ public class ServletContainer {
         File folder = new File(DEPLOY_URL);
         File[] files = folder.listFiles();
         for (File file : files)
-            if (file.isFile() && !file.getName().endsWith(".war"))
+            if (!file.getName().endsWith(".war"))
                 deleteFolder(file);
     }
 

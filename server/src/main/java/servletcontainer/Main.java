@@ -1,16 +1,11 @@
 package servletcontainer;
 
-import servletcontainer.api.HttpServlet;
+import java.io.IOException;
 
 public class Main {
-    public static void main(String... args) {
-        ServletContainer servletContainer = new ServletContainer();
+    public static void main(String... args) throws IOException {
+        ServletContainer servletContainer = new ServletContainer(10);
         servletContainer.servletScan();
-
-        var servletManager = servletContainer.getServletManager();
-        HttpServlet servlet = servletManager.getServlet("/app/");
-        servlet.doGet();
-
-        System.out.println(servlet + " " + servletManager.getServlet("/app/"));
+        servletContainer.start(1234);
     }
 }

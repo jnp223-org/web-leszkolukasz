@@ -1,4 +1,7 @@
-package servletcontainer.api;
+package servletcontainer;
+
+import servletcontainer.api.HttpServletResponse;
+import servletcontainer.api.HttpStatus;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -7,7 +10,7 @@ import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
 
-public class HttpServletResponse {
+public class HttpServletResponseImp implements HttpServletResponse {
     final private Socket client;
     final private StringWriter buffer;
     final private PrintWriter bufferWriter;
@@ -17,7 +20,7 @@ public class HttpServletResponse {
     private boolean bufferFlushed = false;
     private boolean headerLocked = false;
 
-    public HttpServletResponse(Socket client) throws IOException {
+    public HttpServletResponseImp(Socket client) throws IOException {
         this.client = client;
         this.buffer = new StringWriter();
         this.bufferWriter = new PrintWriter(this.buffer, true);
@@ -26,22 +29,27 @@ public class HttpServletResponse {
         this.headers.put("Content-Type", "text/html; charset=utf-8");
     }
 
+    @Override
     public void setStatus(HttpStatus status) {
         if (headerLocked)
             return;
         this.httpStatus = status;
     }
 
+    @Override
     public int getStatus() { return httpStatus.getValue(); };
 
+    @Override
     public void setHeader(String name, String value) {
         if (headerLocked)
             return;
         headers.put(name, value);
     }
 
+    @Override
     public String getHeader(String name) { return headers.get(name); }
 
+    @Override
     public PrintWriter getOutputStream() throws IOException {
         return bufferWriter;
     }
@@ -59,6 +67,7 @@ public class HttpServletResponse {
         clientOutputStream.println();
     }
 
+    @Override
     public void flushBuffer() {
         flushHeaders();
         clientOutputStream.write(buffer.getBuffer().toString());
@@ -66,6 +75,7 @@ public class HttpServletResponse {
         bufferFlushed = true;
     }
 
+    @Override
     public void reset() {
         if (bufferFlushed)
             throw new IllegalStateException();
@@ -76,14 +86,17 @@ public class HttpServletResponse {
         resetBuffer();
     }
 
+    @Override
     public void setHeaderLock(boolean locked) {
         headerLocked = locked;
     }
 
+    @Override
     public void resetBuffer() {
         buffer.getBuffer().setLength(0);
     }
 
+    @Override
     public void close() {
         flushBuffer();
         bufferWriter.close();

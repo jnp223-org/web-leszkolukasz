@@ -1,4 +1,6 @@
-package servletcontainer.api;
+package servletcontainer;
+
+import servletcontainer.api.HttpServlet;
 
 import java.lang.reflect.InvocationTargetException;
 

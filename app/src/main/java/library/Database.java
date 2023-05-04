@@ -1,4 +1,4 @@
-package library.orm;
+package library;
 
 import library.orm.Book;
 
@@ -11,6 +11,7 @@ public class Database {
 
     static {
         books = new ArrayList<>();
+        books.add(new Book(1, "Krzyzacy", "Henryk Sienkiewicz"));
     }
 
     public List<Book> getAll() {
