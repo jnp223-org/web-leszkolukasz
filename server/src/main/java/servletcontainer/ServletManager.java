@@ -31,4 +31,12 @@ public class ServletManager {
 
         return bestMatch;
     }
+
+    public synchronized ServletWrapper getServletWrapperWithRelativeURL(String url) {
+        ServletWrapper bestMatch = servlets.stream()
+                .max(Comparator.comparingInt(wrapper -> wrapper.matchesRelative(url)))
+                .orElse(null);
+
+        return bestMatch;
+    }
 }

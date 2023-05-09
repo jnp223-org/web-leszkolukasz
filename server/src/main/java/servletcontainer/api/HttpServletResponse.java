@@ -10,6 +10,7 @@ public interface HttpServletResponse {
     String getHeader(String name);
     PrintWriter getOutputStream() throws IOException;
     void flushBuffer();
+    boolean isBufferFlushed();
     void reset();
     void setHeaderLock(boolean locked);
     void resetBuffer();

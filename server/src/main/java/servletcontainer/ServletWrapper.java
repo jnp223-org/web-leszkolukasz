@@ -23,6 +23,24 @@ public class ServletWrapper {
         }
     }
 
+    public int matchesRelative(String otherUrl) {
+        if (otherUrl.startsWith(getRelativeUrl())) {
+            return getRelativeUrl().length();
+        } else {
+            return 0;
+        }
+    }
+
+    // e.g. /app/home -> /home
+    public String getRelativeUrl() {
+        int secondSlash = url.indexOf("/", 1);
+
+        if(secondSlash == -1)
+            return "";
+
+        return url.substring(secondSlash, url.length()-1);
+    }
+
     public HttpServlet getServlet() {
         if (instance == null) {
             try {

@@ -26,10 +26,12 @@ public class ServletContainer {
     private ServerSocket serverSocket;
     final private ExecutorService executor;
     final private ServletManager servletManager;
+    final private JSPTranspiler jspTranspiler;
 
     public ServletContainer(int threads) {
         this.servletManager = new ServletManager();
         this.executor = Executors.newFixedThreadPool(threads);
+        this.jspTranspiler = new JSPTranspiler();
     }
 
     public void start(int port) throws IOException {
@@ -43,8 +45,7 @@ public class ServletContainer {
                     HttpServletRequest req = new HttpServletRequestImp(clientSocket, servletManager);
                     HttpServletResponse resp = req.createHttpServletResponse();
                     servletManager.getServlet(req.getUrl()).service(req, resp);
-                }
-                catch (Exception e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
             });
@@ -58,36 +59,83 @@ public class ServletContainer {
     public void servletScan() {
         unzipWarFiles();
 
+        compileJSP();
+        loadClasses();
+
+        removeUnzippedFiles();
+    }
+
+    private void compileJSP() {
         File appFolder = new File(DEPLOY_URL);
         File[] apps = appFolder.listFiles();
 
-        for (File app: apps) {
+        if (apps == null)
+            return;
+
+        for (File app : apps) {
+            if (app.getName().endsWith(".war"))
+                continue;
+
+            compileJSPForWar(app, app, "");
+        }
+    }
+
+    private void compileJSPForWar(File appDir, File dir, String servletUrl) {
+        File[] files = dir.listFiles();
+
+        if (files == null)
+            return;
+
+        for (File file : files) {
+            if (file.isDirectory()) {
+                if (file.getName().equals("WEB-INF"))
+                    continue;
+
+                compileJSPForWar(appDir, file, servletUrl+"/"+file.getName());
+                continue;
+            }
+
+            if (!file.getName().endsWith(".jsp"))
+                continue;
+
+            jspTranspiler.compile(appDir, file, servletUrl+"/"+file.getName());
+        }
+
+    }
+
+    private void loadClasses() {
+        File appFolder = new File(DEPLOY_URL);
+        File[] apps = appFolder.listFiles();
+
+        if (apps == null)
+            return;
+
+        for (File app : apps) {
             if (app.getName().endsWith(".war"))
                 continue;
 
             List<URL> folderURLs = new ArrayList<>();
             List<String> classNames = new ArrayList<>();
             folderURLs.addAll(getFolderURLs(app));
-            classNames.addAll(getclassNames(app, app.getName()));
+            classNames.addAll(getclassNames(app, ""));
 
             URL[] urls = folderURLs.toArray(new URL[0]);
             ClassLoader cl = new URLClassLoader(urls);
 
-            for (var clsName: classNames) {
+            for (var clsName : classNames) {
                 System.out.println(clsName);
                 try {
                     Class<?> cls = cl.loadClass(clsName);
                     Servlet annotation = cls.getAnnotation(Servlet.class);
                     if (annotation != null) {
-                        servletManager.addServlet(cls,  "/" + app.getName() + annotation.url());
+                        servletManager.addServlet(cls, "/" + app.getName() + annotation.url());
+                        System.out.println(clsName + " is servlet!");
                     }
                 } catch (ClassNotFoundException e) {
                     throw new RuntimeException(e);
                 }
             }
         }
-
-        removeUnzippedFiles();
     }
 
     private List<URL> getFolderURLs(File folder) {
@@ -99,6 +147,10 @@ public class ServletContainer {
         }
 
         File[] files = folder.listFiles();
+
+        if (files == null)
+            return folderNames;
+
         for (File file : files)
             if (file.isDirectory())
                 folderNames.addAll(getFolderURLs(file));
@@ -110,8 +162,14 @@ public class ServletContainer {
         List<String> classNames = new ArrayList<>();
 
         File[] files = folder.listFiles();
+
+        if (files == null)
+            return classNames;
+
         for (File file : files) {
             if (file.isDirectory()) {
+                if (file.getName().startsWith("servletcontainer"))
+                    continue;
                 if (file.getName().equals("WEB-INF") || file.getName().equals("classes"))
                     classNames.addAll(getclassNames(file, ""));
                 else {
@@ -120,7 +178,8 @@ public class ServletContainer {
                 }
             } else if (file.isFile() && file.getName().endsWith(".class")) {
                 String className = file.getName().substring(0, file.getName().lastIndexOf("."));
-                classNames.add(packageName + "." + className);
+                String newPackageName = packageName.isEmpty() ? className: packageName + "." + className;
+                classNames.add(newPackageName);
             }
         }
 
@@ -130,6 +189,10 @@ public class ServletContainer {
     public void unzipWarFiles() {
         File folder = new File(DEPLOY_URL);
         File[] files = folder.listFiles();
+
+        if (files == null)
+            return;
+
         for (File file : files) {
             if (file.isFile() && file.getName().endsWith(".war")) {
                 try {
@@ -168,6 +231,10 @@ public class ServletContainer {
     private void removeUnzippedFiles() {
         File folder = new File(DEPLOY_URL);
         File[] files = folder.listFiles();
+
+        if (files == null)
+            return;
+
         for (File file : files)
             if (!file.getName().endsWith(".war"))
                 deleteFolder(file);
@@ -175,13 +242,17 @@ public class ServletContainer {
 
     private void deleteFolder(File folder) {
         File[] files = folder.listFiles();
-            for(File f: files) {
-                if(f.isDirectory()) {
-                    deleteFolder(f);
-                } else {
-                    f.delete();
-                }
+
+        if (files == null)
+            return;
+
+        for (File f : files) {
+            if (f.isDirectory()) {
+                deleteFolder(f);
+            } else {
+                f.delete();
             }
+        }
         folder.delete();
     }
 }

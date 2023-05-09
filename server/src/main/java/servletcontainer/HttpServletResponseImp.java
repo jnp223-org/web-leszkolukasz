@@ -76,6 +76,11 @@ public class HttpServletResponseImp implements HttpServletResponse {
     }
 
     @Override
+    public boolean isBufferFlushed() {
+        return bufferFlushed;
+    }
+
+    @Override
     public void reset() {
         if (bufferFlushed)
             throw new IllegalStateException();

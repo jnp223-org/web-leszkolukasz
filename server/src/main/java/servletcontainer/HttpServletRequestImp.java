@@ -121,7 +121,7 @@ public class HttpServletRequestImp implements HttpServletRequest {
 
     @Override
     public RequestDispatcher getRequestDispatcher(String url) {
-        return new RequestDispatcherImp(servletManager.getServletWrapper(url));
+        return new RequestDispatcherImp(servletManager.getServletWrapperWithRelativeURL(url));
     }
 
     @Override

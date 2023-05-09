@@ -15,12 +15,16 @@ public class RequestDispatcherImp implements RequestDispatcher {
 
     @Override
     public void forward(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        if (response.isBufferFlushed())
+            throw new IllegalStateException();
+
         request.setUrl(servletWrapper.getUrl());
+        response.resetBuffer();
         this.servletWrapper.getServlet().service(request, response);
     }
 
     @Override
-    public void include(HttpServletRequest request, HttpServletResponse response) {
+    public void include(HttpServletRequest request, HttpServletResponse response)  throws IOException {
         response.setHeaderLock(true);
         servletWrapper.getServlet().dispatchRequest(request, response);
         response.setHeaderLock(false);

@@ -16,7 +16,7 @@ public class BookShow implements HttpServlet {
     }
 
     @Override
-    public void doGet(HttpServletRequest req, HttpServletResponse resp) {
+    public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         try {
             var out = resp.getOutputStream();
 

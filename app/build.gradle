@@ -43,18 +43,8 @@ war {
     destinationDirectory = file("build/libs")
     // Set the web app directory for the WAR file
     webAppDirName = 'src/main/java/library'
+
+    from('src/main/resources') {
+        into '/'
+    }
 }
-
-// Exclude the compiled classes from the WAR file
-//war {
-//    classpath fileTree('build/classes/java/main')
-//    exclude 'META-INF/*.RSA', 'META-INF/*.SF', 'META-INF/*.DSA'
-//    exclude 'WEB-INF/classes/**'
-//}
-
-// Include the resources in the WAR file
-//war {
-//    from('src/main/resources') {
-//        into 'WEB-INF/classes'
-//    }
-//}

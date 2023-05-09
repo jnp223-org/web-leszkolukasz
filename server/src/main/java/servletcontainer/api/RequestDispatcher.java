@@ -4,5 +4,5 @@ import java.io.IOException;
 
 public interface RequestDispatcher {
     void forward(HttpServletRequest request, HttpServletResponse response) throws IOException;
-    void include(HttpServletRequest request, HttpServletResponse response);
+    void include(HttpServletRequest request, HttpServletResponse response)  throws IOException;
 }
