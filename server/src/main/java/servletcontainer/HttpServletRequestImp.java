@@ -40,6 +40,7 @@ public class HttpServletRequestImp implements HttpServletRequest {
         int questionMarkIndex = url.indexOf('?');
         if (questionMarkIndex != -1) {
             String query = url.substring(questionMarkIndex + 1);
+            query = query.substring(0, query.length()-1);
             String[] queryParamsArray = query.split("&");
             for (String queryParam : queryParamsArray) {
                 String[] keyValue = queryParam.split("=");
