@@ -38,7 +38,7 @@ public class ServletWrapper {
         if(secondSlash == -1)
             return "";
 
-        return url.substring(secondSlash, url.length()-1);
+        return url.substring(secondSlash);
     }
 
     public HttpServlet getServlet() {

@@ -12,7 +12,7 @@ public class Home implements HttpServlet {
     public void doGet(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
 
-        request.setAttribute("year", "2023");
+        request.setAttribute("year", 2023);
         request.getRequestDispatcher("/index.jsp").forward(request, response);
     }
 }

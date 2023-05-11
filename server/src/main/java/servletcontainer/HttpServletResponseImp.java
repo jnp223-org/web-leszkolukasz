@@ -71,6 +71,7 @@ public class HttpServletResponseImp implements HttpServletResponse {
     public void flushBuffer() {
         flushHeaders();
         clientOutputStream.write(buffer.getBuffer().toString());
+        clientOutputStream.flush();
         resetBuffer();
         bufferFlushed = true;
     }

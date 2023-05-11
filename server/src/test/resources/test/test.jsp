@@ -3,14 +3,10 @@
 
 <!DOCTYPE html>
 <html>
-<head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <title>Nice</title>
-</head>
 <body>
 Hello world ${year}
 <br>
-Hello world ${(Integer)( request.getAttribute("year") ) + 100}
+Hello world ${(Integer)( request.getAttribute("year") ) + 54}
 <br>
 <%-- comment --%>
 <%! int x = 10; %>
@@ -20,10 +16,10 @@ Hello world ${(Integer)( request.getAttribute("year") ) + 100}
 <%= i - 1 %> <br>
 <% } %>
 <% List<Integer> l = new ArrayList<>();
-l.add(10);
-l.add(20);
-l.add(30);
-out.println(l.size());
+    l.add(10);
+    l.add(20);
+    l.add(30);
+    out.println(l.size());
 %>
 </body>
 </html>

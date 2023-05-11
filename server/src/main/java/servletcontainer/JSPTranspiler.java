@@ -1,7 +1,5 @@
 package servletcontainer;
 
-import org.checkerframework.checker.units.qual.A;
-
 import javax.tools.JavaCompiler;
 import javax.tools.JavaFileObject;
 import javax.tools.SimpleJavaFileObject;
@@ -26,7 +24,7 @@ public class JSPTranspiler {
     final private static Pattern directiveTag = Pattern.compile("<%@([\\s\\S]*?)%>");
     final private static Pattern importTag = Pattern.compile("import\\s*=\\s*\"([\\s\\S]+)\"");
     final private static Pattern includeTag = Pattern.compile("include\\s*file\\s*=\\s*\"(\\S+)\"");
-    final private static Pattern variableInEL = Pattern.compile("(\\w+)([^.\\[]+|$)");
+    final private static Pattern segmentInEL = Pattern.compile("((?:[()\"]|[^\\d\\W])+)");
 
     private List<String> definitions;
     private List<String> imports;
@@ -52,7 +50,7 @@ public class JSPTranspiler {
 
         StringBuilder classpaths = new StringBuilder();
         classpaths.append("server/src/main/java:");
-        classpaths.append(appDir.getAbsolutePath() + ":");
+        classpaths.append("src/main/java:");
         classpaths.append(appDir.getAbsolutePath() + ":");
         classpaths.append(Paths.get(appDir.getAbsolutePath(), "WEB-INF").toString() + ":");
         classpaths.append(Paths.get(appDir.getAbsolutePath(), "WEB-INF", "classes").toString() + ":");
@@ -117,7 +115,7 @@ public class JSPTranspiler {
                 }
 
                 else if (expressionMatcher.find() && expressionMatcher.start() == 0) {
-                    handleExpressionTag(expressionMatcher.group(1), true);
+                    handleExpressionTag(expressionMatcher.group(1));
                     jspCode = jspCode.substring(expressionMatcher.end());
                 }
 
@@ -142,19 +140,19 @@ public class JSPTranspiler {
             int ELstart = body.indexOf("${");
 
             if (ELstart == -1) {
-                content.add("out.print(\"" + escapeString(body) + "\");");
+                content.add("out.print(\"" + escapeString(body, null) + "\");");
                 break;
             }
 
             int ELend = body.indexOf("}", ELstart);
 
             if (ELend == -1) {
-                content.add("out.print(\"" + escapeString(body) + "\");");
+                content.add("out.print(\"" + escapeString(body, null) + "\");");
                 break;
             }
 
             if (ELstart != 0) {
-                content.add("out.print(\"" + escapeString(body.substring(0, ELstart)) + "\");");
+                content.add("out.print(\"" + escapeString(body.substring(0, ELstart), null) + "\");");
                 body = body.substring(ELstart);
             }
 
@@ -167,9 +165,16 @@ public class JSPTranspiler {
         }
     }
 
-    private static String escapeString(String str) {
+    private static String escapeString(String str, List<Integer> exclude) {
         StringBuilder builder = new StringBuilder();
+        int pos = 0;
         for (char c : str.toCharArray()) {
+            if (exclude != null && exclude.contains(pos)) {
+                pos++;
+                builder.append(c);
+                continue;
+            }
+
             switch (c) {
                 case '\"':
                     builder.append("\\\"");
@@ -198,24 +203,36 @@ public class JSPTranspiler {
                 default:
                     builder.append(c);
             }
+
+            pos++;
         }
         return builder.toString();
     }
 
     private void handleELTag(String body) {
-        Matcher matcher = variableInEL.matcher(body);
+        Matcher matcher = segmentInEL.matcher(body);
         List<String> toReplace = new ArrayList<>();
 
+        // Tries to extract segments from string. In:
+        // "10" + 10 + x + x.foo() + y.goo("param")
+        // segments are: x, x, foo(), y, goo("param")
         while(matcher.find()) {
-            if (!variableExists(matcher.group(1)))
-                if (!toReplace.contains(matcher.group(1)))
-                    toReplace.add(matcher.group(1));
+            String segment = matcher.group(1);
+            if (segment.contains("(") || segment.contains(")") || segment.contains("\"") || segment.equals("request") || segment.equals("response"))
+                continue;
+
+            if (matcher.start(1) != 0 && body.charAt(matcher.start(1) - 1) == '.')
+                continue;
+
+            if (!variableExists(segment))
+                if (!toReplace.contains(segment))
+                    toReplace.add(segment);
         }
 
         for (var r: toReplace)
             body = body.replace(r, "request.getAttribute(\"" + r + "\")");
 
-        handleExpressionTag(body, false);
+        handleExpressionTag(body);
     }
 
     private boolean variableExists(String variable) {
@@ -257,12 +274,42 @@ public class JSPTranspiler {
         content.add("request.getRequestDispatcher(\"" + matcher.group(1) + "\").include(request, response);");
     }
 
-    private void handleExpressionTag(String body, boolean escape) {
-        if (escape) {
-            content.add("out.print(" + escapeString(body) + ");");
-            return;
+    private void handleExpressionTag(String body) {
+        List<Integer> nonEscapedPositions = new ArrayList<>();
+
+        for (int i = 0; i < body.length(); i++) {
+            if (body.charAt(i) != '\"')
+                continue;
+
+            boolean ok = false;
+            for (int j = i; j > 0; j--) {
+                if (body.charAt(j) == '(') {
+                    ok = true;
+                    break;
+                }
+                else if (body.charAt(j) == ')')
+                    break;
+            }
+
+            if (!ok)
+                continue;
+
+            ok = false;
+
+            for (int j = i; j < body.length(); j++) {
+                if (body.charAt(j) == ')') {
+                    ok = true;
+                    break;
+                }
+                else if (body.charAt(j) == '(')
+                    break;
+            }
+
+            if (ok)
+                nonEscapedPositions.add(i);
         }
-        content.add("out.print(" + body + ");");
+
+        content.add("out.print(" + escapeString(body, nonEscapedPositions) + ");");
     }
 
 
