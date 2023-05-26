@@ -25,7 +25,7 @@ public class Database {
         int idx = -1;
         for(int i = 0; i < books.size(); i++)
             if (books.get(i).id() == id) {
-                idx = id;
+                idx = i;
                 break;
             }
 
