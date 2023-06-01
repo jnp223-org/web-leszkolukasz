@@ -61,32 +61,49 @@ class JSPTranspilerTest {
         response.close();
 
         System.out.println(clientStream);
-        String expected = "HTTP/1.1 200 Ok\n" +
-                "Content-Type text/html; charset=utf-8\n" +
-                "\n" +
-                "\n" +
-                "\n" +
-                "\n" +
-                "<!DOCTYPE html>\n" +
-                "<html>\n" +
-                "<body>\n" +
-                "Hello world 2023\n" +
-                "<br>\n" +
-                "Hello world 2077\n" +
-                "<br>\n" +
-                "\n" +
-                "\n" +
-                "20\n" +
-                "<br>\n" +
-                "-1 <br>\n" +
-                "0 <br>\n" +
-                "1 <br>\n" +
-                "2 <br>\n" +
-                "3 <br>\n" +
-                "3\n" +
-                "</body>\n" +
-                "</html>";
+        String expected = """
+             HTTP/1.1 200 Ok
+             Content-Type text/html; charset=utf-8
+                      
+                      
+                      
+                      
+             <!DOCTYPE html>
+             <html>
+             <body>
+             <h1>Expression lanugage</h1>
+             Hello world 2023
+             <br>
+             Hello world 2023
+             <br>
+             2137
+             <br>
+                      
+             <h1>Scriplet tag</h1>
+                      
+             10
+             3
+             <br>
+                      
+             <h1>Declaration tag + Expression tag</h1>
+                      
+             42
+             <br>
+             4242
+             <br>
+                      
+             <h1> Mixed </h1>
+             -1 <br>
+             0 <br>
+             1 <br>
+             2 <br>
+             3 <br>
+             </body>
+             </html>
+             </html>     
+             """;
 
-        assertEquals(expected, clientStream.toString());
+
+        assertEquals(expected.strip(), clientStream.toString().strip());
     }
 }

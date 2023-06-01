@@ -229,16 +229,23 @@ public class JSPTranspiler {
                 return text;
 
             var parts = textStripped.split("\\.");
-            var output = new StringBuilder("request.getAttribute(\"" + parts[0] + "\")");
+            var output = "request.getAttribute(\"" + parts[0] + "\")";
 
             for (int i = 1; i < parts.length; i++)
-                output.append(".").append(convertToPropertyAccessor(parts[i]));
+                output = wrapWithPropretyAcessor(output, parts[i]);
 
-            return output.toString();
+            return output;
         });
 
         handleExpressionTag(newBody);
     }
+
+    public static String wrapWithPropretyAcessor(String obj, String property)
+    {
+        var accessor = convertToPropertyAccessor(property);
+        return escapeString(obj, null) + ".getClass().getMethod(\"" + accessor + "\").invoke(" + escapeString(obj, null) + ")";
+    }
+
 
     public static String convertToPropertyAccessor(String propertyName) {
         StringBuilder sb = new StringBuilder();
@@ -250,8 +257,6 @@ public class JSPTranspiler {
                 sb.append(propertyName.substring(1));
             }
         }
-
-        sb.append("()");
 
         return sb.toString();
     }
@@ -286,6 +291,8 @@ public class JSPTranspiler {
     private void handleExpressionTag(String body) {
         List<Integer> nonEscapedPositions = new ArrayList<>();
 
+        // For now not needed. It makes sure strings inside function
+        // calls are not escaped.
         for (int i = 0; i < body.length(); i++) {
             if (body.charAt(i) != '\"')
                 continue;
@@ -318,7 +325,7 @@ public class JSPTranspiler {
                 nonEscapedPositions.add(i);
         }
 
-        content.add("out.print(" + escapeString(body, nonEscapedPositions) + ");");
+        content.add("out.print(" + body + ");");
     }
 
 
@@ -349,7 +356,7 @@ public class JSPTranspiler {
             code.append(c + "\n");
 
         code.append("""
-                } catch (IOException e) {
+                } catch (Exception e) {
                             e.printStackTrace();
                 }
             }

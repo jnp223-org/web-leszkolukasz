@@ -15,7 +15,6 @@ public class Home implements HttpServlet {
             throws IOException {
 
         request.setAttribute("year", 2023);
-        request.setAttribute("list", Arrays.asList(1, 2, 3));
         request.getRequestDispatcher("/index.jsp").forward(request, response);
     }
 }

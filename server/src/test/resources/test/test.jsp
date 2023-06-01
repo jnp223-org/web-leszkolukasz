@@ -4,22 +4,36 @@
 <!DOCTYPE html>
 <html>
 <body>
+<h1>Expression lanugage</h1>
 Hello world ${year}
 <br>
-Hello world ${(Integer)( request.getAttribute("year") ) + 54}
+${"Hello world " + year}
 <br>
-<%-- comment --%>
-<%! int x = 10; %>
-<% out.println(x * 2); %>
+${2023 + (114 - 2) / 4 * 2 + 58}
 <br>
-<% for (int i = 0; i < 5; i++) {%>
-<%= i - 1 %> <br>
-<% } %>
+
+<h1>Scriplet tag</h1>
+
 <% List<Integer> l = new ArrayList<>();
     l.add(10);
     l.add(20);
     l.add(30);
+    out.println(l.get(0));
     out.println(l.size());
 %>
+<br>
+
+<h1>Declaration tag + Expression tag</h1>
+<%! int x = 42;%>
+<%= x %>
+<br>
+<%= x * 100 + 42 %>
+<br>
+
+<h1> Mixed </h1>
+<% for (int i = 0; i < 5; i++) {%>
+<%= i - 1 %> <br>
+<% } %>
 </body>
+</html>
 </html>
