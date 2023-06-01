@@ -6,7 +6,7 @@ public interface HttpServlet {
 
     default void service(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         dispatchRequest(req, resp);
-        if (!req.isAsync())
+        if (!req.isAsyncStarted())
             req.complete();
     }
 

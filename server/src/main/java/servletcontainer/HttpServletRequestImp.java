@@ -1,5 +1,6 @@
 package servletcontainer;
 
+import servletcontainer.api.AsyncContext;
 import servletcontainer.api.HttpServletRequest;
 import servletcontainer.api.HttpServletResponse;
 import servletcontainer.api.RequestDispatcher;
@@ -22,6 +23,7 @@ public class HttpServletRequestImp implements HttpServletRequest {
     Map<String, String> parameters;
     Map<String, String> queryParameters;
     private boolean isAsync = false;
+    AsyncContextImp asyncContext;
 
     public HttpServletRequestImp(Socket client, ServletManager servletManager) throws IOException  {
         this.client = client;
@@ -126,8 +128,35 @@ public class HttpServletRequestImp implements HttpServletRequest {
     }
 
     @Override
-    public boolean isAsync() {
+    public boolean isAsyncStarted() {
         return isAsync;
+    }
+
+    @Override
+    public AsyncContext getAsyncContext() { return asyncContext; }
+
+    @Override
+    public AsyncContext startAsync() {
+        if (asyncContext != null) {
+            asyncContext.notifyAndClearListenersOnStart();
+            return asyncContext;
+        }
+
+        isAsync = true;
+        return new AsyncContextImp(this, httpServletResponse);
+    }
+
+    @Override
+    public AsyncContext startAsync(HttpServletRequest request, HttpServletResponse response) {
+        if (asyncContext != null) {
+            asyncContext.notifyAndClearListenersOnStart();
+            asyncContext.setRequest(request);
+            asyncContext.setResponse(response);
+            return asyncContext;
+        }
+
+        isAsync = true;
+        return new AsyncContextImp(request, response);
     }
 
     @Override

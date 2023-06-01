@@ -24,7 +24,7 @@ public class JSPTranspiler {
     final private static Pattern directiveTag = Pattern.compile("<%@([\\s\\S]*?)%>");
     final private static Pattern importTag = Pattern.compile("import\\s*=\\s*\"([\\s\\S]+)\"");
     final private static Pattern includeTag = Pattern.compile("include\\s*file\\s*=\\s*\"(\\S+)\"");
-    final private static Pattern segmentInEL = Pattern.compile("((?:[()\"]|[^\\d\\W])+)");
+    final private static Pattern segmentInEL = Pattern.compile("([a-zA-Z._\\s]+)");
 
     private List<String> definitions;
     private List<String> imports;
@@ -211,40 +211,49 @@ public class JSPTranspiler {
 
     private void handleELTag(String body) {
         Matcher matcher = segmentInEL.matcher(body);
-        List<String> toReplace = new ArrayList<>();
 
         // Tries to extract segments from string. In:
-        // "10" + 10 + x + x.foo() + y.goo("param")
-        // segments are: x, x, foo(), y, goo("param")
-        while(matcher.find()) {
-            String segment = matcher.group(1);
-            if (segment.contains("(") || segment.contains(")") || segment.contains("\"") || segment.equals("request") || segment.equals("response"))
-                continue;
+        // "10" + 10 + x + x.foo + y.foo.goo
+        // segments are: x, x.foo, y.foo.goo
 
-            if (matcher.start(1) != 0 && body.charAt(matcher.start(1) - 1) == '.')
-                continue;
+        String newBody = matcher.replaceAll(match -> {
+            String text = match.group(1);
 
-            if (!variableExists(segment))
-                if (!toReplace.contains(segment))
-                    toReplace.add(segment);
-        }
+            // Skip if text is surrounded by ""
+            if (matcher.start(1) != 0 && body.charAt(matcher.start(1) - 1) == '\"')
+                return text;
 
-        for (var r: toReplace)
-            body = body.replace(r, "request.getAttribute(\"" + r + "\")");
+            String textStripped = text.strip();
 
-        handleExpressionTag(body);
+            if (textStripped.length() == 0)
+                return text;
+
+            var parts = textStripped.split("\\.");
+            var output = new StringBuilder("request.getAttribute(\"" + parts[0] + "\")");
+
+            for (int i = 1; i < parts.length; i++)
+                output.append(".").append(convertToPropertyAccessor(parts[i]));
+
+            return output.toString();
+        });
+
+        handleExpressionTag(newBody);
     }
 
-    private boolean variableExists(String variable) {
-        for (var def: definitions)
-            if (def.contains(" " + variable))
-                return true;
+    public static String convertToPropertyAccessor(String propertyName) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("get");
 
-        for (var c: content)
-            if (c.contains(" " + variable))
-                return true;
+        if (propertyName.length() > 0) {
+            sb.append(Character.toUpperCase(propertyName.charAt(0)));
+            if (propertyName.length() > 1) {
+                sb.append(propertyName.substring(1));
+            }
+        }
 
-        return false;
+        sb.append("()");
+
+        return sb.toString();
     }
 
     private void handleDeclarationTag(String body) {

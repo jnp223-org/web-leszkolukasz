@@ -2,6 +2,7 @@ package servletcontainer.api;
 
 public interface AsyncContext {
     void addListener(AsyncListener listener);
+    void addListener(AsyncListener listener, HttpServletRequest request, HttpServletResponse response);
     HttpServletRequest getRequest();
     HttpServletResponse getResponse();
     long getTimeout();

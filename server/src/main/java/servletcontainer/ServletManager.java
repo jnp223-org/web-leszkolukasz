@@ -2,6 +2,7 @@ package servletcontainer;
 
 import servletcontainer.api.HttpServlet;
 import servletcontainer.routes.DefaultServlet;
+import servletcontainer.routes.TimeoutServlet;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -15,6 +16,7 @@ public class ServletManager {
     public ServletManager() {
         this.servlets = new ArrayList<>();
         addServlet(DefaultServlet.class, "/");
+        addServlet(TimeoutServlet.class, "/timeout");
     }
 
     public synchronized void addServlet(Class<?> cls, String url) {

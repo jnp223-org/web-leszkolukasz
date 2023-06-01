@@ -13,6 +13,9 @@ public interface HttpServletRequest {
     String getQueryParameter(String name);
     String getParameter(String name);
     RequestDispatcher getRequestDispatcher(String url);
-    boolean isAsync();
+    boolean isAsyncStarted();
+    AsyncContext getAsyncContext();
+    AsyncContext startAsync();
+    AsyncContext startAsync(HttpServletRequest request, HttpServletResponse response);
     void complete() throws IOException;
 }
