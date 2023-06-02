@@ -1,17 +1,15 @@
 package servletcontainer.routes;
 
-import servletcontainer.api.HttpServlet;
-import servletcontainer.api.HttpServletRequest;
-import servletcontainer.api.HttpServletResponse;
-import servletcontainer.api.HttpStatus;
-
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-public class TimeoutServlet implements HttpServlet {
+public class TimeoutServlet extends HttpServlet {
     @Override
     public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        resp.setStatus(HttpStatus.REQUEST_TIMEOUT);
+        resp.setStatus(408);
         resp.resetBuffer();
-        resp.getOutputStream().println("TIMEOUT FOR REQUEST");
+        resp.getWriter().println("TIMEOUT FOR REQUEST");
     }
 }

@@ -1,4 +1,4 @@
-package servletcontainer.api;
+package servletcontainer;
 
 public enum HttpStatus {
     // 1xx Informational
@@ -72,6 +72,15 @@ public enum HttpStatus {
 
     public int getValue() {
         return value;
+    }
+
+    public static HttpStatus findByCode(int code) {
+        for (var enumValue : HttpStatus.values()) {
+            if (enumValue.getValue() == code) {
+                return enumValue;
+            }
+        }
+        return null;
     }
 
     @Override

@@ -1,13 +1,12 @@
 package servletcontainer.routes;
 
-import servletcontainer.api.HttpServlet;
-import servletcontainer.api.HttpServletRequest;
-import servletcontainer.api.HttpServletResponse;
-import servletcontainer.api.HttpStatus;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
-public class DefaultServlet implements HttpServlet {
+public class DefaultServlet extends  HttpServlet {
     @Override
     public void doGet(HttpServletRequest req, HttpServletResponse resp) {
-        resp.setStatus(HttpStatus.NOT_FOUND);
+        resp.setStatus(404);
     }
 }

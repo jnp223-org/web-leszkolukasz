@@ -1,11 +1,6 @@
 package servletcontainer;
 
 import org.junit.jupiter.api.Test;
-import servletcontainer.api.HttpServlet;
-import servletcontainer.api.HttpServletRequest;
-import servletcontainer.api.HttpServletResponse;
-
-import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -13,8 +8,8 @@ import static org.mockito.Mockito.*;
 class RequestDispatcherImpTest {
 
     @Test
-    void forward() throws IOException {
-        HttpServletResponse responseMock = mock(HttpServletResponseImp.class);
+    void forward() {
+        HttpServletResponseImp responseMock = mock(HttpServletResponseImp.class);
         when(responseMock.isBufferFlushed()).thenReturn(true);
 
         var dispatcher = new RequestDispatcherImp(null);
@@ -22,8 +17,8 @@ class RequestDispatcherImpTest {
 
         when(responseMock.isBufferFlushed()).thenReturn(false);
         ServletWrapper wrapperMock = mock(ServletWrapper.class);
-        HttpServlet servletMock = mock(HttpServlet.class);
-        HttpServletRequest requestMock = mock(HttpServletRequestImp.class);
+        HttpServletDelegator servletMock = mock(HttpServletDelegator.class);
+        HttpServletRequestImp requestMock = mock(HttpServletRequestImp.class);
         when(wrapperMock.getServlet()).thenReturn(servletMock);
 
         var dispatcher2 = new RequestDispatcherImp(wrapperMock);
@@ -32,11 +27,11 @@ class RequestDispatcherImpTest {
     }
 
     @Test
-    void include() throws IOException {
-        HttpServletResponse responseMock = mock(HttpServletResponseImp.class);
+    void include() {
+        HttpServletResponseImp responseMock = mock(HttpServletResponseImp.class);
         ServletWrapper wrapperMock = mock(ServletWrapper.class);
-        HttpServlet servletMock = mock(HttpServlet.class);
-        HttpServletRequest requestMock = mock(HttpServletRequestImp.class);
+        HttpServletDelegator servletMock = mock(HttpServletDelegator.class);
+        HttpServletRequestImp requestMock = mock(HttpServletRequestImp.class);
         when(wrapperMock.getServlet()).thenReturn(servletMock);
 
         var dispatcher = new RequestDispatcherImp(wrapperMock);

@@ -1,17 +1,16 @@
 package servletcontainer;
 
-import servletcontainer.api.AsyncContext;
-import servletcontainer.api.AsyncEvent;
-import servletcontainer.api.HttpServletRequest;
-import servletcontainer.api.HttpServletResponse;
+import javax.servlet.*;
+import javax.servlet.http.*;
 
-public class AsyncEventImp implements AsyncEvent {
+public class AsyncEventImp extends AsyncEvent {
     final private AsyncContext context;
     private HttpServletRequest request;
     private HttpServletResponse response;
     private Throwable throwable;
 
     public AsyncEventImp(AsyncContext context) {
+        super(context);
         this.context = context;
     }
 

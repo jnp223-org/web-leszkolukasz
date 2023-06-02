@@ -1,10 +1,8 @@
 package servletcontainer;
 
-import servletcontainer.api.HttpServletRequest;
-import servletcontainer.api.HttpServletResponse;
-import servletcontainer.api.RequestDispatcher;
-
-import java.io.IOException;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 
 public class RequestDispatcherImp implements RequestDispatcher {
     final private ServletWrapper servletWrapper;
@@ -14,19 +12,25 @@ public class RequestDispatcherImp implements RequestDispatcher {
     }
 
     @Override
-    public void forward(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        if (response.isBufferFlushed())
+    public void forward(ServletRequest request, ServletResponse response){
+        var resp = (HttpServletResponseImp) response;
+        var req = (HttpServletRequestImp) request;
+
+        if (resp.isBufferFlushed())
             throw new IllegalStateException();
 
-        request.setUrl(servletWrapper.getUrl());
-        response.resetBuffer();
-        this.servletWrapper.getServlet().service(request, response);
+        req.setUrl(servletWrapper.getUrl());
+        resp.resetBuffer();
+        this.servletWrapper.getServlet().service(req, resp);
     }
 
     @Override
-    public void include(HttpServletRequest request, HttpServletResponse response)  throws IOException {
-        response.setHeaderLock(true);
-        servletWrapper.getServlet().dispatchRequest(request, response);
-        response.setHeaderLock(false);
+    public void include(ServletRequest request, ServletResponse response){
+        var resp = (HttpServletResponseImp) response;
+        var req = (HttpServletRequestImp) request;
+
+        resp.setHeaderLock(true);
+        servletWrapper.getServlet().dispatchRequest(req, resp);
+        resp.setHeaderLock(false);
     }
 }

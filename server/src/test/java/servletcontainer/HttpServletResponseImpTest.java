@@ -5,7 +5,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import servletcontainer.api.HttpStatus;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -40,7 +39,7 @@ public class HttpServletResponseImpTest {
     @Test
     public void setGetStatus() {
         assertEquals(200, response.getStatus());
-        response.setStatus(HttpStatus.NOT_FOUND);
+        response.setStatus(404);
         assertEquals(404, response.getStatus());
     }
 
@@ -53,7 +52,7 @@ public class HttpServletResponseImpTest {
 
     @Test
     public void getOutputStream() throws IOException {
-        response.getOutputStream().write("Hello, World!");
+        response.getWriter().write("Hello, World!");
         response.flushBuffer();
 
         String expected = "HTTP/1.1 200 Ok\n" +
@@ -72,7 +71,7 @@ public class HttpServletResponseImpTest {
 
     @Test
     public void reset() {
-        response.setStatus(HttpStatus.NOT_FOUND);
+        response.setStatus(404);
         response.setHeader("Content-Type", "text/plain");
         response.reset();
 
@@ -96,7 +95,7 @@ public class HttpServletResponseImpTest {
 
     @Test
     public void resetBuffer() throws IOException {
-        response.getOutputStream().write("Hello, World!");
+        response.getWriter().write("Hello, World!");
         response.resetBuffer();
 
         assertEquals("", clientStream.toString().trim());

@@ -20,9 +20,9 @@
             for (Book book : books) {
     %>
     <tr>
-        <td><%= book.id() %></td>
-        <td><%= book.name() %></td>
-        <td><%= book.author() %></td>
+        <td><%= book.getId() %></td>
+        <td><%= book.getName() %></td>
+        <td><%= book.getAuthor() %></td>
     </tr>
     <%
         }

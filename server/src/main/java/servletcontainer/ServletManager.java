@@ -1,13 +1,11 @@
 package servletcontainer;
 
-import servletcontainer.api.HttpServlet;
 import servletcontainer.routes.DefaultServlet;
 import servletcontainer.routes.TimeoutServlet;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 
 public class ServletManager {
 
@@ -30,7 +28,7 @@ public class ServletManager {
         servlets.add(new ServletWrapper(cls, url));
     }
 
-    public synchronized HttpServlet getServlet(String url) {
+    public synchronized HttpServletDelegator getServlet(String url) {
         var wrapper = getServletWrapper(url);
         return wrapper == null ? null : wrapper.getServlet();
     }

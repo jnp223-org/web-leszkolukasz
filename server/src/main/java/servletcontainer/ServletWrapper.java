@@ -1,13 +1,12 @@
 package servletcontainer;
 
-import servletcontainer.api.HttpServlet;
-
+import javax.servlet.http.HttpServlet;
 import java.lang.reflect.InvocationTargetException;
 
 public class ServletWrapper {
     final private Class<?> cls;
     final private String url;
-    private HttpServlet instance;
+    private HttpServletDelegator instance;
 
     public ServletWrapper(Class cls, String url) {
         this.cls = cls;
@@ -41,10 +40,10 @@ public class ServletWrapper {
         return url.substring(secondSlash);
     }
 
-    public HttpServlet getServlet() {
+    public HttpServletDelegator getServlet() {
         if (instance == null) {
             try {
-                this.instance = (HttpServlet) cls.getDeclaredConstructor().newInstance();
+                this.instance = new HttpServletDelegator((HttpServlet) cls.getDeclaredConstructor().newInstance());
             } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
                      NoSuchMethodException e) {
                 throw new RuntimeException(e);

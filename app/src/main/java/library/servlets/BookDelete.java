@@ -2,11 +2,13 @@ package library.servlets;
 
 import library.Database;
 
-import servletcontainer.api.*;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.*;
+import javax.servlet.http.*;
 import java.io.IOException;
 
-@Servlet(url = "/books/delete")
-public class BookDelete implements HttpServlet {
+@WebServlet(value = "/books/delete")
+public class BookDelete extends HttpServlet {
     private Database db;
 
     public BookDelete() {
@@ -14,15 +16,17 @@ public class BookDelete implements HttpServlet {
     }
 
     @Override
-    public void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws IOException {
+    public void doGet(HttpServletRequest request, HttpServletResponse response) {
 
-        request.getRequestDispatcher("/bookDelete.jsp").forward(request, response);
+        try {
+            request.getRequestDispatcher("/bookDelete.jsp").forward(request, response);
+        } catch (ServletException | IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
-    public void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws IOException {
+    public void doPost(HttpServletRequest request, HttpServletResponse response) {
 
         int id = Integer.parseInt(request.getParameter("id"));
 

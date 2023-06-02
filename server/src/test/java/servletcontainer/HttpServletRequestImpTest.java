@@ -6,7 +6,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
-import servletcontainer.api.HttpServletResponse;
 
 import static org.mockito.Mockito.*;
 
@@ -22,8 +21,6 @@ class HttpServletRequestImpTest {
     Socket socketMock;
     @Mock
     ServletManager servletManagerMock;
-    @Mock
-    HttpServletResponse httpServletResponseMock;
 
     @BeforeEach
     public void setUp() throws Exception {
@@ -66,7 +63,7 @@ class HttpServletRequestImpTest {
 
         HttpServletRequestImp httpServletRequest = new HttpServletRequestImp(socketMock, null);
 
-        assertEquals("value", httpServletRequest.getQueryParameter("name"));
+        assertEquals("value", httpServletRequest.getParameter("name"));
     }
 
     @Test

@@ -2,26 +2,30 @@ package library.servlets;
 
 import library.Database;
 
-import servletcontainer.api.*;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.*;
+import javax.servlet.http.*;
 import java.io.IOException;
 
-@Servlet(url = "/books/add")
-public class BookAdd implements HttpServlet {
+@WebServlet(value = "/books/add")
+public class BookAdd extends HttpServlet {
     private Database db;
     public BookAdd() {
         db = new Database();
     }
 
     @Override
-    public void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws IOException {
+    public void doGet(HttpServletRequest request, HttpServletResponse response) {
 
-        request.getRequestDispatcher("/bookAdd.jsp").forward(request, response);
+        try {
+            request.getRequestDispatcher("/bookAdd.jsp").forward(request, response);
+        } catch (ServletException | IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
-    public void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws IOException {
+    public void doPost(HttpServletRequest request, HttpServletResponse response) {
 
         String name = request.getParameter("name");
         String author = request.getParameter("author");

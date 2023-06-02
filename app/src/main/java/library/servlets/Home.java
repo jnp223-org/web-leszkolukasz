@@ -1,20 +1,25 @@
 package library.servlets;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
 
-import servletcontainer.api.*;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.*;
+import javax.servlet.http.*;
 
-@Servlet(
-        url = "/hello"
+@WebServlet(
+        value = "/hello"
 )
-public class Home implements HttpServlet {
+public class Home extends HttpServlet {
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
 
         request.setAttribute("year", 2023);
-        request.getRequestDispatcher("/index.jsp").forward(request, response);
+
+        try {
+            request.getRequestDispatcher("/index.jsp").forward(request, response);
+        } catch (ServletException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

@@ -1,14 +1,13 @@
 package servletcontainer.servlets;
 
-import servletcontainer.api.HttpServlet;
-import servletcontainer.api.HttpServletRequest;
-import servletcontainer.api.HttpServletResponse;
-
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-public class SlowServlet implements HttpServlet {
+public class SlowServlet extends HttpServlet {
     @Override
-    public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+    public void doGet(HttpServletRequest req, HttpServletResponse resp) {
         try {
             Thread.sleep(5000);
         } catch (InterruptedException e) {

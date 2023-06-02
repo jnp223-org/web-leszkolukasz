@@ -7,20 +7,20 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 
-import servletcontainer.api.*;
+import javax.servlet.AsyncContext;
+import javax.servlet.annotation.*;
+import javax.servlet.http.*;
 
 import static java.time.temporal.ChronoUnit.SECONDS;
 
-@Servlet(
-        url = "/async"
+@WebServlet(
+        value = "/async"
 )
-public class AsyncServlet implements HttpServlet {
+public class AsyncServlet extends HttpServlet {
     @Override
-    public void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws IOException {
+    public void doGet(HttpServletRequest request, HttpServletResponse response) {
 
         AsyncContext asyncContext = request.startAsync();
         HttpRequest requestAsync;

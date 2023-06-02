@@ -1,6 +1,6 @@
 package servletcontainer.servlets;
 
-import servletcontainer.api.HttpServlet;
+import javax.servlet.http.HttpServlet;
 
-public class EmptyServlet implements HttpServlet {
+public class EmptyServlet extends HttpServlet {
 }

@@ -1,7 +1,5 @@
 package servletcontainer;
 
-import servletcontainer.api.*;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -9,15 +7,19 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import javax.servlet.*;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 public class AsyncContextImp implements AsyncContext {
-    private HttpServletRequest request;
-    private HttpServletResponse response;
+    private HttpServletRequestImp request;
+    private HttpServletResponseImp response;
     final private List<AsyncListenerWrapper> listeners;
     private long timeout;
 
     public AsyncContextImp(HttpServletRequest request, HttpServletResponse response) {
-        this.request = request;
-        this.response = response;
+        this.request = (HttpServletRequestImp) request;
+        this.response = (HttpServletResponseImp) response;
         this.listeners = new ArrayList<>();
         this.timeout = 30000;
     }
@@ -28,23 +30,56 @@ public class AsyncContextImp implements AsyncContext {
     }
 
     @Override
-    public void addListener(AsyncListener listener, HttpServletRequest request, HttpServletResponse response) {
-        listeners.add(new AsyncListenerWrapper(listener, request, response));
+    public void addListener(AsyncListener listener, ServletRequest request, ServletResponse response) {
+        listeners.add(new AsyncListenerWrapper(listener, (HttpServletRequest) request, (HttpServletResponse) response));
+    }
+
+    @Override
+    public <T extends AsyncListener> T createListener(Class<T> clazz) throws ServletException {
+        return null;
     }
 
     @Override
     public HttpServletRequest getRequest() {
-        return request;
+        return (HttpServletRequest) request;
     }
 
-    public void setRequest(HttpServletRequest request) { this.request = request; };
+    public void setRequest(HttpServletRequest request) {
+        this.request = (HttpServletRequestImp) request;
+    }
+
+    ;
 
     @Override
     public HttpServletResponse getResponse() {
-        return response;
+        return (HttpServletResponse) response;
     }
 
-    public void setResponse(HttpServletResponse response) { this.response = response; };
+    @Override
+    public boolean hasOriginalRequestAndResponse() {
+        return false;
+    }
+
+    @Override
+    public void dispatch() {
+
+    }
+
+    @Override
+    public void dispatch(String path) {
+
+    }
+
+    @Override
+    public void dispatch(ServletContext context, String path) {
+
+    }
+
+    public void setResponse(HttpServletResponse response) {
+        this.response = (HttpServletResponseImp) response;
+    }
+
+    ;
 
     @Override
     public long getTimeout() {
@@ -67,14 +102,13 @@ public class AsyncContextImp implements AsyncContext {
                                 listeners.forEach(AsyncListenerWrapper::notifyOnTimeout);
 
                                 try {
-                                    response.getOutputStream().println("ASYNC TIMEOUT");
+                                    response.getWriter().println("ASYNC TIMEOUT");
 //                                  request.getRequestDispatcher("/timeout").include(request, response);
                                     complete();
                                 } catch (IOException e) {
                                     throw new RuntimeException(e);
                                 }
-                            }
-                            else
+                            } else
                                 listeners.forEach(listener -> listener.notifyOnError(throwable));
                         }
                         return null;
@@ -120,19 +154,35 @@ public class AsyncContextImp implements AsyncContext {
         }
 
         public void notifyOnStartAsync() {
-            listener.onStartAsync(new AsyncEventImp(AsyncContextImp.this, request, response));
+            try {
+                listener.onStartAsync(new AsyncEventImp(AsyncContextImp.this, request, response));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
 
         public void notifyOnComplete() {
-            listener.onComplete(new AsyncEventImp(AsyncContextImp.this, request, response));
+            try {
+                listener.onComplete(new AsyncEventImp(AsyncContextImp.this, request, response));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
 
         public void notifyOnTimeout() {
-            listener.onTimeout(new AsyncEventImp(AsyncContextImp.this, request, response));
+            try {
+                listener.onTimeout(new AsyncEventImp(AsyncContextImp.this, request, response));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
 
         public void notifyOnError(Throwable err) {
-            listener.onError(new AsyncEventImp(AsyncContextImp.this, request, response, err));
+            try {
+                listener.onError(new AsyncEventImp(AsyncContextImp.this, request, response, err));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 }

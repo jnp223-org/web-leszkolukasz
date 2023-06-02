@@ -24,7 +24,7 @@ public class Database {
     public void delete(int id) {
         int idx = -1;
         for(int i = 0; i < books.size(); i++)
-            if (books.get(i).id() == id) {
+            if (books.get(i).getId() == id) {
                 idx = i;
                 break;
             }
@@ -35,7 +35,7 @@ public class Database {
 
     public Book getById(int id) {
         for(int i = 0; i < books.size(); i++)
-            if (books.get(i).id() == id) {
+            if (books.get(i).getId() == id) {
                 return books.get(i);
             }
         return null;
@@ -43,7 +43,7 @@ public class Database {
 
     public void update(int id, String name, String author) {
         for(int i = 0; i < books.size(); i++)
-            if (books.get(i).id() == id) {
+            if (books.get(i).getId() == id) {
                 books.set(i, new Book(id, name, author));
             }
     }

@@ -1,21 +1,17 @@
 package servletcontainer;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
-import servletcontainer.api.HttpServlet;
-import servletcontainer.api.HttpServletRequest;
-import servletcontainer.api.HttpServletResponse;
 
+import javax.servlet.http.HttpServlet;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.net.MalformedURLException;
 import java.net.Socket;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -51,11 +47,11 @@ class JSPTranspilerTest {
         ClassLoader cl = new URLClassLoader(urls);
 
         Class<?> servletCls = cl.loadClass("test");
-        HttpServlet servlet = (HttpServlet) servletCls.getDeclaredConstructor().newInstance();
+        HttpServletDelegator servlet = new HttpServletDelegator((HttpServlet) servletCls.getDeclaredConstructor().newInstance());
 
-        HttpServletRequest request = mock(HttpServletRequestImp.class);
+        HttpServletRequestImp request = mock(HttpServletRequestImp.class);
         when(request.getAttribute("year")).thenReturn(2023);
-        HttpServletResponse response = new HttpServletResponseImp(socketMock);
+        HttpServletResponseImp response = new HttpServletResponseImp(socketMock);
 
         servlet.doGet(request, response);
         response.close();

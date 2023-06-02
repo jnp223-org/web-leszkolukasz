@@ -43,6 +43,8 @@ public class JSPTranspiler {
         URI sourceUri = URI.create(file.getName().replace(".jsp", ".java"));
         JavaFileObject sourceFile = new JavaStringSource(sourceUri, javaSource);
 
+        System.out.println(Paths.get(".").toAbsolutePath().normalize().toString());
+
         List<String> options = new ArrayList<>();
         options.add("-d");
         options.add(appDir.getAbsolutePath());
@@ -50,12 +52,17 @@ public class JSPTranspiler {
 
         StringBuilder classpaths = new StringBuilder();
         classpaths.append("server/src/main/java:");
+        classpaths.append("server/src/main/resources:");
+        classpaths.append("server/src/main/resources/servlet-api.jar:");
+        // For tests
         classpaths.append("src/main/java:");
+        classpaths.append("src/main/resources:");
+        classpaths.append("src/main/resources/servlet-api.jar:");
+
         classpaths.append(appDir.getAbsolutePath() + ":");
         classpaths.append(Paths.get(appDir.getAbsolutePath(), "WEB-INF").toString() + ":");
         classpaths.append(Paths.get(appDir.getAbsolutePath(), "WEB-INF", "classes").toString() + ":");
         classpaths.append(Paths.get(appDir.getAbsolutePath(), "WEB-INF", "lib").toString() + ":");
-        classpaths.append(Paths.get(appDir.getAbsolutePath(), "WEB-INF", "lib").toString());
 
         options.add(classpaths.toString());
 
@@ -334,22 +341,24 @@ public class JSPTranspiler {
         StringBuilder code = new StringBuilder();
 
         code.append("import java.io.IOException;\n");
-        code.append("import servletcontainer.api.*;\n");
+        code.append("import javax.servlet.annotation.*;\n");
+        code.append("import javax.servlet.http.*;\n");
+        code.append("import javax.servlet.*;\n");
 
         for (String i: imports)
             code.append(i + "\n");
 
-        code.append("@Servlet(url=\"" + servlerUrl + "\")\n");
-        code.append("public class " + fileName + " implements HttpServlet {\n");
+        code.append("@WebServlet(value=\"" + servlerUrl + "\")\n");
+        code.append("public class " + fileName + " extends HttpServlet {\n");
 
         for (String def: definitions)
             code.append(def + "\n");
 
         code.append("""
             @Override
-            public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+            public void doGet(HttpServletRequest request, HttpServletResponse response) {
                 try {
-                    var out = response.getOutputStream();
+                    var out = response.getWriter();
         """);
 
         for (String c: content)
