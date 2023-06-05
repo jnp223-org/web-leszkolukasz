@@ -1,5 +1,8 @@
 package servletcontainer;
 
+import javax.servlet.*;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -7,14 +10,10 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import javax.servlet.*;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 public class AsyncContextImp implements AsyncContext {
+    final private List<AsyncListenerWrapper> listeners;
     private HttpServletRequestImp request;
     private HttpServletResponseImp response;
-    final private List<AsyncListenerWrapper> listeners;
     private long timeout;
 
     public AsyncContextImp(HttpServletRequest request, HttpServletResponse response) {
@@ -30,8 +29,11 @@ public class AsyncContextImp implements AsyncContext {
     }
 
     @Override
-    public void addListener(AsyncListener listener, ServletRequest request, ServletResponse response) {
-        listeners.add(new AsyncListenerWrapper(listener, (HttpServletRequest) request, (HttpServletResponse) response));
+    public void addListener(AsyncListener listener, ServletRequest request,
+                            ServletResponse response) {
+        listeners.add(new AsyncListenerWrapper(listener,
+                (HttpServletRequest) request,
+                (HttpServletResponse) response));
     }
 
     @Override
@@ -41,18 +43,20 @@ public class AsyncContextImp implements AsyncContext {
 
     @Override
     public HttpServletRequest getRequest() {
-        return (HttpServletRequest) request;
+        return request;
     }
 
     public void setRequest(HttpServletRequest request) {
         this.request = (HttpServletRequestImp) request;
     }
 
-    ;
-
     @Override
     public HttpServletResponse getResponse() {
-        return (HttpServletResponse) response;
+        return response;
+    }
+
+    public void setResponse(HttpServletResponse response) {
+        this.response = (HttpServletResponseImp) response;
     }
 
     @Override
@@ -62,24 +66,15 @@ public class AsyncContextImp implements AsyncContext {
 
     @Override
     public void dispatch() {
-
     }
 
     @Override
     public void dispatch(String path) {
-
     }
 
     @Override
     public void dispatch(ServletContext context, String path) {
-
     }
-
-    public void setResponse(HttpServletResponse response) {
-        this.response = (HttpServletResponseImp) response;
-    }
-
-    ;
 
     @Override
     public long getTimeout() {
@@ -103,13 +98,13 @@ public class AsyncContextImp implements AsyncContext {
 
                                 try {
                                     response.getWriter().println("ASYNC TIMEOUT");
-//                                  request.getRequestDispatcher("/timeout").include(request, response);
                                     complete();
                                 } catch (IOException e) {
                                     throw new RuntimeException(e);
                                 }
-                            } else
+                            } else {
                                 listeners.forEach(listener -> listener.notifyOnError(throwable));
+                            }
                         }
                         return null;
                     });
@@ -139,11 +134,12 @@ public class AsyncContextImp implements AsyncContext {
     }
 
     private class AsyncListenerWrapper {
-        private HttpServletRequest request;
-        private HttpServletResponse response;
-        private AsyncListener listener;
+        private final HttpServletRequest request;
+        private final HttpServletResponse response;
+        private final AsyncListener listener;
 
-        public AsyncListenerWrapper(AsyncListener listener, HttpServletRequest request, HttpServletResponse response) {
+        public AsyncListenerWrapper(AsyncListener listener, HttpServletRequest request,
+                                    HttpServletResponse response) {
             this.listener = listener;
             this.request = request;
             this.response = response;

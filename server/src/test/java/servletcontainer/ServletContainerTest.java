@@ -27,11 +27,8 @@ class ServletContainerTest {
 
     @AfterEach
     void tearDown() throws InterruptedException {
-        try {
-            serverThread.stop();
-        }
-        catch (ThreadDeath e) {}
-        Thread.sleep(1000);
+        servletContainer.stop();
+        Thread.sleep(1500);
     }
 
     void startServer(int port) throws InterruptedException {

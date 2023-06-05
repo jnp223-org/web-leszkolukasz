@@ -36,7 +36,8 @@ class JSPTranspilerTest {
     }
 
     @Test
-    void transpile() throws IOException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+    void transpile() throws IOException, ClassNotFoundException, NoSuchMethodException,
+            InvocationTargetException, InstantiationException, IllegalAccessException {
         File appDir = new File("src/test/resources/test");
         File jspFile = new File("src/test/resources/test/test.jsp");
 
@@ -47,7 +48,8 @@ class JSPTranspilerTest {
         ClassLoader cl = new URLClassLoader(urls);
 
         Class<?> servletCls = cl.loadClass("test");
-        HttpServletDelegator servlet = new HttpServletDelegator((HttpServlet) servletCls.getDeclaredConstructor().newInstance());
+        HttpServletDelegator servlet = new HttpServletDelegator(
+                (HttpServlet) servletCls.getDeclaredConstructor().newInstance());
 
         HttpServletRequestImp request = mock(HttpServletRequestImp.class);
         when(request.getAttribute("year")).thenReturn(2023);
@@ -56,7 +58,6 @@ class JSPTranspilerTest {
         servlet.doGet(request, response);
         response.close();
 
-        System.out.println(clientStream);
         String expected = """
              HTTP/1.1 200 Ok
              Content-Type text/html; charset=utf-8

@@ -70,10 +70,6 @@ public enum HttpStatus {
         this.value = value;
     }
 
-    public int getValue() {
-        return value;
-    }
-
     public static HttpStatus findByCode(int code) {
         for (var enumValue : HttpStatus.values()) {
             if (enumValue.getValue() == code) {
@@ -81,6 +77,10 @@ public enum HttpStatus {
             }
         }
         return null;
+    }
+
+    public int getValue() {
+        return value;
     }
 
     @Override
@@ -93,6 +93,6 @@ public enum HttpStatus {
             sb.append(' ');
         }
         sb.deleteCharAt(sb.length() - 1);
-        return value + " " + sb.toString();
+        return value + " " + sb;
     }
 }

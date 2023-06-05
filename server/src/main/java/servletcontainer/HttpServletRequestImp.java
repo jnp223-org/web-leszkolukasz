@@ -14,15 +14,15 @@ import javax.servlet.http.*;
 public class HttpServletRequestImp implements HttpServletRequest {
     final Socket client;
     final ServletManager servletManager;
-    HttpServletResponseImp httpServletResponse;
     final private String method;
-    private String url;
+    HttpServletResponseImp httpServletResponse;
     Map<String, String> headers;
-    Map<String, Object> attributes;
-    Map<String, String> parameters;
+    Map<String, Object> attributes; // used for data transfer between servlets
+    Map<String, String> parameters; // in POST these are body parameters
     Map<String, String> queryParameters;
-    private boolean isAsync = false;
     AsyncContextImp asyncContext;
+    private String url;
+    private boolean isAsync = false;
 
     public HttpServletRequestImp(Socket client, ServletManager servletManager) {
         this.client = client;
@@ -183,7 +183,8 @@ public class HttpServletRequestImp implements HttpServletRequest {
     }
 
     @Override
-    public boolean authenticate(HttpServletResponse response) throws IOException, ServletException {
+    public boolean authenticate(HttpServletResponse response)
+            throws IOException, ServletException {
         return false;
     }
 
@@ -208,7 +209,8 @@ public class HttpServletRequestImp implements HttpServletRequest {
     }
 
     @Override
-    public <T extends HttpUpgradeHandler> T upgrade(Class<T> httpUpgradeHandlerClass) throws IOException, ServletException {
+    public <T extends HttpUpgradeHandler> T upgrade(Class<T> httpUpgradeHandlerClass)
+            throws IOException, ServletException {
         return null;
     }
 
@@ -314,7 +316,7 @@ public class HttpServletRequestImp implements HttpServletRequest {
 
     @Override
     public Enumeration<String> getHeaderNames() {
-        return null;
+        return Collections.enumeration(headers.keySet());
     }
 
     @Override
@@ -334,7 +336,10 @@ public class HttpServletRequestImp implements HttpServletRequest {
 
     @Override
     public Enumeration<String> getParameterNames() {
-        return null;
+        var names = parameters.keySet();
+        names.addAll(queryParameters.keySet());
+
+        return Collections.enumeration(names);
     }
 
     @Override
@@ -424,11 +429,13 @@ public class HttpServletRequestImp implements HttpServletRequest {
 
     @Override
     public boolean isAsyncSupported() {
-        return false;
+        return true;
     }
 
     @Override
-    public AsyncContext getAsyncContext() { return asyncContext; }
+    public AsyncContext getAsyncContext() {
+        return asyncContext;
+    }
 
     @Override
     public DispatcherType getDispatcherType() {
@@ -443,20 +450,22 @@ public class HttpServletRequestImp implements HttpServletRequest {
         }
 
         isAsync = true;
-        return new AsyncContextImp(this, httpServletResponse);
+        asyncContext =  new AsyncContextImp(this, httpServletResponse);
+        return asyncContext;
     }
 
     @Override
     public AsyncContext startAsync(ServletRequest request, ServletResponse response) {
         if (asyncContext != null) {
             asyncContext.notifyAndClearListenersOnStart();
-            asyncContext.setRequest((HttpServletRequest)request);
-            asyncContext.setResponse((HttpServletResponse)response);
+            asyncContext.setRequest((HttpServletRequest) request);
+            asyncContext.setResponse((HttpServletResponse) response);
             return asyncContext;
         }
 
         isAsync = true;
-        return new AsyncContextImp((HttpServletRequest)request, (HttpServletResponse)response);
+        asyncContext = new AsyncContextImp((HttpServletRequest) request, (HttpServletResponse) response);
+        return asyncContext;
     }
 
     public void complete() {

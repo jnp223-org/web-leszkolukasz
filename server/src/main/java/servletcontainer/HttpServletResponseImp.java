@@ -14,11 +14,14 @@ import java.util.Map;
 
 public class HttpServletResponseImp implements HttpServletResponse {
     final private Socket client;
+
+    // Accumulates data. Data is sent to client only when buffer is flushed
+    // or HttpServletResponse is closed.
     final private StringWriter buffer;
     final private PrintWriter bufferWriter;
     final private PrintWriter clientOutputStream;
-    private Map<String, String> headers;
-    private HttpStatus httpStatus = HttpStatus.OK;
+    private final Map<String, String> headers;
+    private HttpStatus httpStatus = HttpStatus.OK; // Default http status is 200.
     private boolean bufferFlushed = false;
     private boolean headerLocked = false;
 
@@ -28,7 +31,14 @@ public class HttpServletResponseImp implements HttpServletResponse {
         this.bufferWriter = new PrintWriter(this.buffer, true);
         this.clientOutputStream = new PrintWriter(client.getOutputStream(), true);
         this.headers = new HashMap<>();
+
+        // By default, response is of type text/html.
         this.headers.put("Content-Type", "text/html; charset=utf-8");
+    }
+
+    @Override
+    public int getStatus() {
+        return httpStatus.getValue();
     }
 
     @Override
@@ -40,20 +50,13 @@ public class HttpServletResponseImp implements HttpServletResponse {
     }
 
     @Override
-    public int getStatus() {
-        return httpStatus.getValue();
-    }
-
-    ;
-
-    @Override
     public void addCookie(Cookie cookie) {
 
     }
 
     @Override
     public boolean containsHeader(String name) {
-        return false;
+        return headers.containsKey(name);
     }
 
     @Override
@@ -66,7 +69,7 @@ public class HttpServletResponseImp implements HttpServletResponse {
         return null;
     }
 
-    @Override
+    @Override// Accumulates data. Data
     public String encodeUrl(String url) {
         return null;
     }
@@ -149,10 +152,21 @@ public class HttpServletResponseImp implements HttpServletResponse {
     }
 
     @Override
+    public void setCharacterEncoding(String charset) {
+
+    }
+
+    @Override
     public String getContentType() {
         return null;
     }
 
+    @Override
+    public void setContentType(String type) {
+
+    }
+
+    // Only getWriter is supported.
     @Override
     public ServletOutputStream getOutputStream() throws IOException {
         return null;
@@ -160,11 +174,6 @@ public class HttpServletResponseImp implements HttpServletResponse {
 
     public PrintWriter getWriter() throws IOException {
         return bufferWriter;
-    }
-
-    @Override
-    public void setCharacterEncoding(String charset) {
-
     }
 
     @Override
@@ -178,21 +187,17 @@ public class HttpServletResponseImp implements HttpServletResponse {
     }
 
     @Override
-    public void setContentType(String type) {
-
+    public int getBufferSize() {
+        return buffer.getBuffer().length();
     }
 
     @Override
     public void setBufferSize(int size) {
-
-    }
-
-    @Override
-    public int getBufferSize() {
-        return 0;
+        buffer.getBuffer().setLength(size);
     }
 
     private void flushHeaders() {
+        // Headers can only be flushed before body is flushed.
         if (bufferFlushed)
             return;
 
@@ -230,13 +235,13 @@ public class HttpServletResponseImp implements HttpServletResponse {
     }
 
     @Override
-    public void setLocale(Locale loc) {
-
+    public Locale getLocale() {
+        return null;
     }
 
     @Override
-    public Locale getLocale() {
-        return null;
+    public void setLocale(Locale loc) {
+
     }
 
     public void setHeaderLock(boolean locked) {

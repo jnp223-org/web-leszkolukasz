@@ -2,8 +2,6 @@ package servletcontainer;
 
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -17,12 +15,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ServletContainer {
+    // Directory with war files
     final private String DEPLOY_URL = "server/src/main/resources/deploy";
-    private int port;
-    private ServerSocket serverSocket;
     final private ExecutorService executor;
     final private ServletManager servletManager;
     final private JSPTranspiler jspTranspiler;
+    private int port;
+    private ServerSocket serverSocket;
+    private boolean finish;
 
     public ServletContainer(int threads) {
         this.servletManager = new ServletManager();
@@ -33,19 +33,28 @@ public class ServletContainer {
     public void start(int port) throws IOException {
         this.port = port;
         serverSocket = new ServerSocket(port);
+        serverSocket.setSoTimeout(1000);
 
-        while (true) {
-            Socket clientSocket = serverSocket.accept();
-            executor.submit(() -> {
-                try {
-                    HttpServletRequestImp req = new HttpServletRequestImp(clientSocket, servletManager);
-                    HttpServletResponseImp resp = (HttpServletResponseImp) req.createHttpServletResponse();
-                    servletManager.getServlet(req.getUrl()).service(req, resp);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            });
+        finish = false;
+        while (!finish) {
+            try {
+                Socket clientSocket = serverSocket.accept();
+                executor.execute(() -> {
+                    try {
+                        HttpServletRequestImp req = new HttpServletRequestImp(clientSocket, servletManager);
+                        HttpServletResponseImp resp = (HttpServletResponseImp) req.createHttpServletResponse();
+                        servletManager.getServlet(req.getUrl()).service(req, resp);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                });
+            } catch (SocketTimeoutException ignored) {
+            }
         }
+    }
+
+    public void stop() {
+        finish = true;
     }
 
     public void addRoute(Class<? extends HttpServlet> cls, String path) {
@@ -65,12 +74,10 @@ public class ServletContainer {
         File appFolder = new File(DEPLOY_URL);
         File[] apps = appFolder.listFiles();
 
-        if (apps == null)
-            return;
+        if (apps == null) return;
 
         for (File app : apps) {
-            if (app.getName().endsWith(".war"))
-                continue;
+            if (app.getName().endsWith(".war")) continue;
 
             compileJSPForWar(app, app, "");
         }
@@ -79,22 +86,19 @@ public class ServletContainer {
     private void compileJSPForWar(File appDir, File dir, String servletUrl) {
         File[] files = dir.listFiles();
 
-        if (files == null)
-            return;
+        if (files == null) return;
 
         for (File file : files) {
             if (file.isDirectory()) {
-                if (file.getName().equals("WEB-INF"))
-                    continue;
+                if (file.getName().equals("WEB-INF")) continue;
 
-                compileJSPForWar(appDir, file, servletUrl+"/"+file.getName());
+                compileJSPForWar(appDir, file, servletUrl + "/" + file.getName());
                 continue;
             }
 
-            if (!file.getName().endsWith(".jsp"))
-                continue;
+            if (!file.getName().endsWith(".jsp")) continue;
 
-            jspTranspiler.compile(appDir, file, servletUrl+"/"+file.getName());
+            jspTranspiler.compile(appDir, file, servletUrl + "/" + file.getName());
         }
 
     }
@@ -103,29 +107,27 @@ public class ServletContainer {
         File appFolder = new File(DEPLOY_URL);
         File[] apps = appFolder.listFiles();
 
-        if (apps == null)
-            return;
+        if (apps == null) return;
 
         for (File app : apps) {
-            if (app.getName().endsWith(".war"))
-                continue;
+            if (app.getName().endsWith(".war")) continue;
 
-            List<URL> folderURLs = new ArrayList<>();
-            List<String> classNames = new ArrayList<>();
-            folderURLs.addAll(getFolderURLs(app));
-            classNames.addAll(getclassNames(app, ""));
+            List<URL> folderURLs = new ArrayList<>(getFolderURLs(app));
+            List<String> classNames = new ArrayList<>(getClassNames(app, ""));
 
             URL[] urls = folderURLs.toArray(new URL[0]);
             ClassLoader cl = new URLClassLoader(urls);
 
             for (var clsName : classNames) {
-                System.out.println(clsName);
                 try {
                     Class<?> cls = cl.loadClass(clsName);
                     WebServlet annotation = cls.getAnnotation(WebServlet.class);
+
                     if (annotation != null) {
-                        servletManager.addServlet(cls, "/" + app.getName() + annotation.value()[0]);
-                        System.out.println(clsName + " is servlet!");
+                        if (HttpServlet.class.isAssignableFrom(cls)) continue;
+                        servletManager.addServlet(
+                                (Class<? extends HttpServlet>) cls,
+                                "/" + app.getName() + annotation.value()[0]);
                     }
                 } catch (ClassNotFoundException e) {
                     throw new RuntimeException(e);
@@ -144,37 +146,34 @@ public class ServletContainer {
 
         File[] files = folder.listFiles();
 
-        if (files == null)
-            return folderNames;
+        if (files == null) return folderNames;
 
         for (File file : files)
-            if (file.isDirectory())
-                folderNames.addAll(getFolderURLs(file));
+            if (file.isDirectory()) folderNames.addAll(getFolderURLs(file));
 
         return folderNames;
     }
 
-    private List<String> getclassNames(File folder, String packageName) {
+    private List<String> getClassNames(File folder, String packageName) {
         List<String> classNames = new ArrayList<>();
 
         File[] files = folder.listFiles();
 
-        if (files == null)
-            return classNames;
+        if (files == null) return classNames;
 
         for (File file : files) {
             if (file.isDirectory()) {
-                if (file.getName().startsWith("servletcontainer"))
-                    continue;
+                if (file.getName().startsWith("servletcontainer")) continue;
                 if (file.getName().equals("WEB-INF") || file.getName().equals("classes"))
-                    classNames.addAll(getclassNames(file, ""));
+                    classNames.addAll(getClassNames(file, ""));
                 else {
-                    String newPackageName = packageName.isEmpty() ? file.getName() : packageName + "." + file.getName();
-                    classNames.addAll(getclassNames(file, newPackageName));
+                    String newPackageName = packageName.isEmpty() ?
+                            file.getName() : packageName + "." + file.getName();
+                    classNames.addAll(getClassNames(file, newPackageName));
                 }
             } else if (file.isFile() && file.getName().endsWith(".class")) {
                 String className = file.getName().substring(0, file.getName().lastIndexOf("."));
-                String newPackageName = packageName.isEmpty() ? className: packageName + "." + className;
+                String newPackageName = packageName.isEmpty() ? className : packageName + "." + className;
                 classNames.add(newPackageName);
             }
         }
@@ -186,8 +185,7 @@ public class ServletContainer {
         File folder = new File(DEPLOY_URL);
         File[] files = folder.listFiles();
 
-        if (files == null)
-            return;
+        if (files == null) return;
 
         for (File file : files) {
             if (file.isFile() && file.getName().endsWith(".war")) {
@@ -228,19 +226,16 @@ public class ServletContainer {
         File folder = new File(DEPLOY_URL);
         File[] files = folder.listFiles();
 
-        if (files == null)
-            return;
+        if (files == null) return;
 
         for (File file : files)
-            if (!file.getName().endsWith(".war"))
-                deleteFolder(file);
+            if (!file.getName().endsWith(".war")) deleteFolder(file);
     }
 
     private void deleteFolder(File folder) {
         File[] files = folder.listFiles();
 
-        if (files == null)
-            return;
+        if (files == null) return;
 
         for (File f : files) {
             if (f.isDirectory()) {

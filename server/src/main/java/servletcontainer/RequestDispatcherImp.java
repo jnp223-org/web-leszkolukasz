@@ -12,7 +12,7 @@ public class RequestDispatcherImp implements RequestDispatcher {
     }
 
     @Override
-    public void forward(ServletRequest request, ServletResponse response){
+    public void forward(ServletRequest request, ServletResponse response) {
         var resp = (HttpServletResponseImp) response;
         var req = (HttpServletRequestImp) request;
 
@@ -25,7 +25,7 @@ public class RequestDispatcherImp implements RequestDispatcher {
     }
 
     @Override
-    public void include(ServletRequest request, ServletResponse response){
+    public void include(ServletRequest request, ServletResponse response) {
         var resp = (HttpServletResponseImp) response;
         var req = (HttpServletRequestImp) request;
 

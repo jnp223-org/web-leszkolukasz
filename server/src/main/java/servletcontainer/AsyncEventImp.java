@@ -1,7 +1,9 @@
 package servletcontainer;
 
-import javax.servlet.*;
-import javax.servlet.http.*;
+import javax.servlet.AsyncContext;
+import javax.servlet.AsyncEvent;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 public class AsyncEventImp extends AsyncEvent {
     final private AsyncContext context;
@@ -14,13 +16,15 @@ public class AsyncEventImp extends AsyncEvent {
         this.context = context;
     }
 
-    public AsyncEventImp(AsyncContext context, HttpServletRequest request, HttpServletResponse response) {
+    public AsyncEventImp(AsyncContext context, HttpServletRequest request,
+                         HttpServletResponse response) {
         this(context);
         this.request = request;
         this.response = response;
     }
 
-    public AsyncEventImp(AsyncContext context, HttpServletRequest request, HttpServletResponse response, Throwable throwable) {
+    public AsyncEventImp(AsyncContext context, HttpServletRequest request,
+                         HttpServletResponse response, Throwable throwable) {
         this(context, request, response);
         this.throwable = throwable;
     }

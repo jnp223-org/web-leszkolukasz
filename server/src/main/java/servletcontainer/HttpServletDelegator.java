@@ -8,8 +8,7 @@ import java.lang.reflect.Method;
 public class HttpServletDelegator {
     final private HttpServlet httpServlet;
 
-    public HttpServletDelegator(HttpServlet httpServlet)
-    {
+    public HttpServletDelegator(HttpServlet httpServlet) {
         this.httpServlet = httpServlet;
     }
 
@@ -29,9 +28,12 @@ public class HttpServletDelegator {
         }
     }
 
+    // do* must be called using Java Reflection because it is protected method.
     public void doGet(HttpServletRequestImp req, HttpServletResponseImp resp) {
         try {
-            Method method = httpServlet.getClass().getDeclaredMethod("doGet", HttpServletRequest.class, HttpServletResponse.class);
+            Method method = httpServlet
+                    .getClass()
+                    .getDeclaredMethod("doGet", HttpServletRequest.class, HttpServletResponse.class);
             method.setAccessible(true);
             method.invoke(httpServlet, req, resp);
 
@@ -42,7 +44,9 @@ public class HttpServletDelegator {
 
     public void doPost(HttpServletRequestImp req, HttpServletResponseImp resp) {
         try {
-            Method method = httpServlet.getClass().getDeclaredMethod("doPost", HttpServletRequest.class, HttpServletResponse.class);
+            Method method = httpServlet
+                    .getClass()
+                    .getDeclaredMethod("doPost", HttpServletRequest.class, HttpServletResponse.class);
             method.setAccessible(true);
             method.invoke(httpServlet, req, resp);
 
@@ -53,7 +57,9 @@ public class HttpServletDelegator {
 
     public void doPut(HttpServletRequestImp req, HttpServletResponseImp resp) {
         try {
-            Method method = httpServlet.getClass().getDeclaredMethod("doPut", HttpServletRequest.class, HttpServletResponse.class);
+            Method method = httpServlet
+                    .getClass()
+                    .getDeclaredMethod("doPut", HttpServletRequest.class, HttpServletResponse.class);
             method.setAccessible(true);
             method.invoke(httpServlet, req, resp);
 
@@ -64,7 +70,9 @@ public class HttpServletDelegator {
 
     public void doDelete(HttpServletRequestImp req, HttpServletResponseImp resp) {
         try {
-            Method method = httpServlet.getClass().getDeclaredMethod("doDelete", HttpServletRequest.class, HttpServletResponse.class);
+            Method method = httpServlet
+                    .getClass()
+                    .getDeclaredMethod("doDelete", HttpServletRequest.class, HttpServletResponse.class);
             method.setAccessible(true);
             method.invoke(httpServlet, req, resp);
 
