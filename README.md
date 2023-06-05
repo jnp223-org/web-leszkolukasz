@@ -16,7 +16,7 @@ Serwer obłsugue dowolną klasę dziedziczącą po HttpServlet. Taką klasę mo�
 
 ### HttpServletRequest i HttpServletResponse
 
-Najważniejsze funkcjonalności tych klas są zaimplementowane. Można pisać do klienta przy użyciu PrintWriter, ustawiać headery, status odpowiedzi. HttpServletRequest potrafi wyciągnąć url requesta, metodę Http (GET, POST itd.), query parametrers i parametry z body (w przypadku POSTa). Dane są wysyłane do klienta po sflushowaniu bufora lub zamknięciu HttpServletResponse. Za pomocą RequestDispatchera można wysyłać zapytania do innych servletów w tym sevletów JSP.
+Najważniejsze funkcjonalności tych klas są zaimplementowane. Można pisać do klienta przy użyciu PrintWriter, ustawiać headery, status odpowiedzi. HttpServletRequest potrafi wyciągnąć url requesta, metodę Http (GET, POST, DELETE, PATCH), query parameters i parametry z body (w przypadku POSTa). Dane są wysyłane do klienta po zflushowaniu bufora lub zamknięciu HttpServletResponse. Za pomocą RequestDispatchera można wysyłać zapytania do innych servletów w tym sevletów JSP.
 
 ### Async Servlet
 
@@ -28,4 +28,17 @@ Jesli aplikacja została zapakowana do war i przeniesiona do folderu `deploy` b�
 
 ### JSP
 
-Serwer potrafi transpilować pliki .jsp do .class. Jest wparcie dla prawie całego syntaxa w JSP. Można korzystać z ```<%@ page import/include=... %>, <% ... %>, <%! ... %>, <%= ... %>, <%-- %>, ${...}```. ```${}``` pozwala na korzystanie z Expression Language. Można wykonywać proste operacje arytmetyczne, a także wszelkie wyrażenia postaci insatnce.property1.property2 będzie zamieniane na request.getAttribute("instance").getProperty1().getProperty2(). W ```<% ... %>``` działa też syntax ```out.println(...)```, który pisze bezposrednio do klienta. JSP można wyświetlać za pomocą RequestDispatcher::forward lub dostępne jest bezpośrednio pod adresem `localhost:8000/warName/jspFileName.jsp`
+Serwer potrafi transpilować pliki .jsp do .class. Jest wparcie dla prawie całego syntaxa w JSP. Można korzystać z ```<%@ page import/include=... %>, <% ... %>, <%! ... %>, <%= ... %>, <%-- %>, ${...}```. ```${}``` pozwala na korzystanie z Expression Language. Można wykonywać proste operacje arytmetyczne, a także wszelkie wyrażenia postaci insatnce.property1.property2 będzie zamieniane na request.getAttribute("instance").getProperty1().getProperty2(). W ```<% ... %>``` działa też syntax ```out.println(...)```, który pisze bezposrednio do klienta. JSP można wyświetlać za pomocą RequestDispatcher::forward lub dostępne jest bezpośrednio pod adresem `localhost:8000/warName/jspFileName.jsp`.
+
+## Aplikacja bilbioteczna
+
+Do zaprezentowania działania serwera zaimplementowałem aplikacje biblioteczną. Frontend tworzony jest w pełni przy pomocy JSP. Aplikacja zapakowana jest do library.war i jest ładowana do serwera po jego uruchomieniu. Dostępne endpointy:
+
+- **/library/books/show (GET)** - wypisuje wszystkie ksiażki
+- **/library/books/add (GET/POST)** - dodaje nową książke
+- **/library/books/update?id= (GET/POST)** - updatuje ksiązke o danym id
+- **/library/books/delete (GET/POST)** - usuwa ksiązke
+
+## Testy
+
+Jest ponad 30 testów sprawdzających większość funkcjonalności i aplikację biblioteczną.
