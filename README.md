@@ -12,19 +12,19 @@ Serwer wspiera obsługę wielu klientów kilkoma wątkami. Domyślnie wykorzysty
 
 ### HttpServlet
 
-Serwer obłsugue dowolną klasę dziedziczącą po HttpServlet. Taką klasę można dodać korzystająć z ServletManager::addServlet(cls, url).
+Serwer obłsugue dowolną klasę dziedziczącą po HttpServlet. Taką klasę można dodać korzystając z ServletManager::addServlet(cls, url).
 
 ### HttpServletRequest i HttpServletResponse
 
-Najważniejsze funkcjonalności tych klas są zaimplementowane. Można pisać do klienta przy użyciu PrintWriter, ustawiać headery, status odpowiedzi. HttpServletRequest potrafi wyciągnąć url requesta, metodę Http (GET, POST, DELETE, PATCH), query parameters i parametry z body (w przypadku POSTa). Dane są wysyłane do klienta po zflushowaniu bufora lub zamknięciu HttpServletResponse. Za pomocą RequestDispatchera można wysyłać zapytania do innych servletów w tym sevletów JSP.
+Najważniejsze funkcjonalności tych klas są zaimplementowane. Można pisać do klienta przy użyciu PrintWriter, ustawiać headery, status odpowiedzi. HttpServletRequest potrafi wyciągnąć url requesta, metodę HTTP (GET, POST, DELETE, PATCH), query parameters i parametry z body (w przypadku POSTa). Dane są wysyłane do klienta po zflushowaniu bufora lub zamknięciu HttpServletResponse. Za pomocą RequestDispatchera można wysyłać zapytania do innych servletów w tym sevletów JSP.
 
 ### Async Servlet
 
-Jest wsparcie dla async servletów. Po wykonaniu HttpServletRequest::startAsync request przechodzi w tryb asynchroniczny. Są dwa tryby. Można korzystać z dowolnego kodu tak długo jak kiedyś wykona się AsyncContext::complete, które kończy połącznie z klientem (w tym z async-http-client). Można również korzystać z AsyncConext::start(Runnable), tutaj też trzeba wykonać AsyncContext::complete. To drugie jest zgodne z Java API. Wspiera też timeout i AsyncListener.
+Jest wsparcie dla async servletów. Po wykonaniu HttpServletRequest::startAsync request przechodzi w tryb asynchroniczny. Są dwie możliwości korzystania z tego trybu. Dowolny kod będzie działał tak długo jak kiedyś wykona się AsyncContext::complete, które kończy połącznie z klientem (w tym można korzystać z async-http-client). Można również korzystać z AsyncConext::start(Runnable), tutaj też trzeba wykonać AsyncContext::complete. To drugie jest zgodne z Java API. Wspiera też timeout i AsyncListener.
 
 ### Component scanning
 
-Jesli aplikacja została zapakowana do war i przeniesiona do folderu `deploy` będzie automatycznie załadowana. Wszystkie klasy z annotacją WebServlet i dziedziczące po HttpServlet będą dodane servlet containera i będą dostępne pod `localhost:port/warName/classUrl`. Każda taka klasa musi mieć co najmniej jeden `classUrl` wyspecyfikowany w annotacji WebServlet w atrybucie value. Jeśli apliakcja korzysta z JSP będzie ono automatycznie skopilowane do .class i załadowane.
+Jesli aplikacja została zapakowana do war i przeniesiona do folderu `deploy` będzie automatycznie załadowana. Wszystkie klasy z annotacją WebServlet i dziedziczące po HttpServlet będą dodane servlet containera i będą dostępne pod `localhost:port/warName/classUrl`. Każda taka klasa musi mieć co najmniej jeden `classUrl` wyspecyfikowany w annotacji WebServlet w atrybucie value. Jeśli aplikacja korzysta z JSP będzie ono automatycznie skopilowane do .class i załadowane.
 
 ### JSP
 
