@@ -1,5 +1,7 @@
 # SockerServer + CRUD
 
+To samo co na master, ale przepisane do tomcat.
+
 ### Endpoints:
 
 - **app/books/show (GET)** - wypisuje wszystkie ksiażki
