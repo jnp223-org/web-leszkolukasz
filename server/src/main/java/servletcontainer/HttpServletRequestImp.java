@@ -58,18 +58,20 @@ public class HttpServletRequestImp implements HttpServletRequest {
             }
 
             StringBuilder payload = new StringBuilder();
-            while (in.ready()) {
+            int contentLength = headers.get("Content-Length") != null ?
+                    Integer.parseInt(headers.get("Content-Length")) : 0;
+
+            for (int i = 0; i < contentLength || in.ready(); i++)
                 payload.append((char) in.read());
-            }
 
             String payloadStr = payload.toString();
             if (payloadStr.equals(""))
                 return;
 
             String[] pairs = payloadStr.split("&");
-            for (String pair : pairs) {
+
+            for (String pair : pairs)
                 parameters.put(pair.split("=")[0], pair.split("=")[1]);
-            }
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

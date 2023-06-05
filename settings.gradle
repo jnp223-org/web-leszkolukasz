@@ -9,4 +9,4 @@
 
 rootProject.name = 'web-app'
 include('server')
-include('app')
+include('library')

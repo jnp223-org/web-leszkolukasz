@@ -1,7 +1,6 @@
 package servletcontainer;
 
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import servletcontainer.servlets.SlowServlet;
 
@@ -19,11 +18,6 @@ class ServletContainerTest {
 
     private Thread serverThread;
     private ServletContainer servletContainer;
-
-    @BeforeEach
-    void setUp() {
-        servletContainer = new ServletContainer(2);
-    }
 
     @AfterEach
     void tearDown() throws InterruptedException {
@@ -50,6 +44,7 @@ class ServletContainerTest {
 
     @Test
     void multithreading() throws URISyntaxException, IOException, InterruptedException {
+        servletContainer = new ServletContainer(2);
         servletContainer.addRoute(SlowServlet.class, "/slow");
         startServer(1234);
 
@@ -87,6 +82,7 @@ class ServletContainerTest {
 
     @Test
     void notFound() throws InterruptedException, URISyntaxException, IOException {
+        servletContainer = new ServletContainer(2);
         startServer(1235);
 
         HttpRequest request = HttpRequest.newBuilder()

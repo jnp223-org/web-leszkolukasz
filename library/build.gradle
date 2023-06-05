@@ -9,6 +9,7 @@
 plugins {
     // Apply the application plugin to add support for building a CLI application in Java.
     id 'application'
+    id 'war'
 }
 
 repositories {
@@ -19,21 +20,16 @@ repositories {
 dependencies {
     // Use JUnit Jupiter for testing.
     testImplementation 'org.junit.jupiter:junit-jupiter:5.9.1'
-    testImplementation group: 'org.mockito', name: 'mockito-core', version: '5.3.1'
-
-    implementation 'org.apache.tomcat:tomcat-servlet-api:9.0.75'
 
     // This dependency is used by the application.
     implementation 'com.google.guava:guava:31.1-jre'
-    testImplementation 'junit:junit:4.13.1'
-    testImplementation 'org.apache.tomcat:tomcat-servlet-api:9.0.75'
-    testImplementation 'org.asynchttpclient:async-http-client:2.12.3'
 
+    implementation 'org.apache.tomcat:tomcat-servlet-api:9.0.75'
 }
 
 application {
     // Define the main class for the application.
-    mainClass = 'servletcontainer.Main'
+    // mainClass = 'library.App'
 }
 
 tasks.named('test') {
@@ -41,11 +37,14 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
-tasks.named('jar', Jar) {
-    // Set the output directory for the generated JAR file
-    archiveFileName = "servlet-api.jar"
+war {
+    // Set the output directory and filename for the generated WAR file
+    archiveFileName = "library.war"
     destinationDirectory = file("build/libs")
-    from('build/classes/java/main/servletcontainer/api') {
-        include '**/*.class'
+    // Set the web app directory for the WAR file
+    webAppDirName = 'src/main/java/library'
+
+    from('src/main/resources') {
+        into '/'
     }
 }

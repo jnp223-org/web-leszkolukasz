@@ -16,7 +16,7 @@ import java.util.List;
 
 public class ServletContainer {
     // Directory with war files
-    final private String DEPLOY_URL = "server/src/main/resources/deploy";
+    private String DEPLOY_URL = "server/src/main/resources/deploy";
     final private ExecutorService executor;
     final private ServletManager servletManager;
     final private JSPTranspiler jspTranspiler;
@@ -61,7 +61,10 @@ public class ServletContainer {
         servletManager.addServlet(cls, path);
     }
 
-    public void servletScan() {
+    public void servletScan(String url) {
+        if (url != null)
+            DEPLOY_URL = url;
+
         unzipWarFiles();
 
         compileJSP();
@@ -124,7 +127,7 @@ public class ServletContainer {
                     WebServlet annotation = cls.getAnnotation(WebServlet.class);
 
                     if (annotation != null) {
-                        if (HttpServlet.class.isAssignableFrom(cls)) continue;
+                        if (!HttpServlet.class.isAssignableFrom(cls)) continue;
                         servletManager.addServlet(
                                 (Class<? extends HttpServlet>) cls,
                                 "/" + app.getName() + annotation.value()[0]);
