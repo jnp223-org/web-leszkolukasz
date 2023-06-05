@@ -28,7 +28,7 @@ Jesli aplikacja została zapakowana do war i przeniesiona do folderu `deploy` b�
 
 ### JSP
 
-Serwer potrafi transpilować pliki .jsp do .class. Jest wparcie dla prawie całego syntaxa w JSP. Można korzystać z ```<%@ page import/include=... %>, <% ... %>, <%! ... %>, <%= ... %>, <%-- %>, ${...}```. ```${}``` pozwala na korzystanie z Expression Language. Można wykonywać proste operacje arytmetyczne, a także wszelkie wyrażenia postaci insatnce.property1.property2 będzie zamieniane na request.getAttribute("instance").getProperty1().getProperty2(). W ```<% ... %>``` działa też syntax ```out.println(...)```, który pisze bezposrednio do klienta. JSP można wyświetlać za pomocą RequestDispatcher::forward lub dostępne jest bezpośrednio pod adresem `localhost:8000/warName/jspFileName.jsp`.
+Serwer potrafi transpilować pliki .jsp do .class. Jest wparcie dla prawie całego syntaxa w JSP. Można korzystać z ```<%@ page import/include=... %>, <% ... %>, <%! ... %>, <%= ... %>, <%-- %>, ${...}```. ```${}``` pozwala na korzystanie z Expression Language. Można wykonywać proste operacje arytmetyczne, a także wszelkie wyrażenia postaci insatnce.property1.property2 będzie zamieniane na request.getAttribute("instance").getProperty1().getProperty2(). W ```<% ... %>``` działa też syntax ```out.println(...)```, który pisze bezposrednio do klienta. JSP można wyświetlać za pomocą RequestDispatcher::forward lub dostępne jest bezpośrednio pod adresem `localhost:8000/warName/jspFileName.jsp`. Przykładowe działanie jsp jest dostępne pod adresem `localhost:8000/library/hello`.
 
 ## Aplikacja bilbioteczna
 
